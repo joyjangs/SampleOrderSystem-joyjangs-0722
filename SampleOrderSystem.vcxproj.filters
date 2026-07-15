@@ -25,6 +25,9 @@
     <Filter Include="Controller Files">
       <UniqueIdentifier>{2C3D4E5F-0004-4a2b-9c3d-1a2b3c4d5e6f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{2C3D4E5F-0005-4a2b-9c3d-1a2b3c4d5e6f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" Filter="소스 파일" />
@@ -40,6 +43,11 @@
     <ClCompile Include="View\SampleView.cpp" Filter="View Files" />
     <ClCompile Include="Controller\MainMenuController.cpp" Filter="Controller Files" />
     <ClCompile Include="Controller\SampleController.cpp" Filter="Controller Files" />
+    <ClCompile Include="Tests\ModelSerializationTests.cpp" Filter="Tests" />
+    <ClCompile Include="Tests\RepositoryTests.cpp" Filter="Tests" />
+    <ClCompile Include="Tests\ControllerTests.cpp" Filter="Tests" />
+    <ClCompile Include="Tests\SampleControllerTests.cpp" Filter="Tests" />
+    <ClCompile Include="Tests\SampleManagementSystemTests.cpp" Filter="Tests" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\Json.h" Filter="Common Files" />
