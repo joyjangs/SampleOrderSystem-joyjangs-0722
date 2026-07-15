@@ -1,7 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <filesystem>
-
 #include "Model/OrderRepository.h"
 #include "Model/ProductionJobRepository.h"
 #include "Model/SampleRepository.h"
@@ -281,14 +279,15 @@ TEST_F(ProductionJobRepositoryTest, PreservesInsertionOrderAcrossMultipleEntitie
     EXPECT_EQ(all[2].GetOrderId(), "ORD-3");
 }
 
-class OrderProductionRestartTest : public ::testing::Test {
+class OrderProductionRestartTest : public Tests::TempFileFixture {
 protected:
-    std::string ordersPath = "data/test_orders.json";
-    std::string jobsPath = "data/test_production_jobs.json";
-    void TearDown() override {
-        std::filesystem::remove(ordersPath);
-        std::filesystem::remove(jobsPath);
-    }
+    OrderProductionRestartTest()
+        : TempFileFixture(std::vector<std::string>{"data/test_orders.json", "data/test_production_jobs.json"}),
+          ordersPath("data/test_orders.json"),
+          jobsPath("data/test_production_jobs.json") {}
+
+    std::string ordersPath;
+    std::string jobsPath;
 };
 
 TEST_F(OrderProductionRestartTest, ProducingOrderAndQueuedJobSurviveRestart) {

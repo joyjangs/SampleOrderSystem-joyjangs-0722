@@ -1,15 +1,14 @@
 #include <gtest/gtest.h>
 
-#include <filesystem>
-#include <iostream>
 #include <regex>
-#include <sstream>
 
 #include "Controller/OrderController.h"
 #include "Model/OrderRepository.h"
 #include "Model/OrderService.h"
 #include "Model/Sample.h"
 #include "Model/SampleRepository.h"
+#include "Tests/TestSupport/ConsoleRedirectGuard.h"
+#include "Tests/TestSupport/TempFileFixture.h"
 #include "View/OrderView.h"
 
 // Phase 2 §7.2: end-to-end tests wiring the real SampleRepository/
@@ -17,46 +16,27 @@
 // OrderController and the real OrderView together — no mocks. OrderView
 // reads from std::cin/writes to std::cout directly, so these tests redirect
 // std::cin/std::cout for the duration of a scripted OrderController::Run()
-// call (RAII guards below, same pattern as Tests/SampleManagementSystemTests.cpp).
+// call (RAII guards from Tests/TestSupport/ConsoleRedirectGuard.h, shared
+// with Tests/SampleManagementSystemTests.cpp).
 namespace {
 
-class CinRedirectGuard {
-public:
-    explicit CinRedirectGuard(const std::string& scriptedInput) : input_(scriptedInput) {
-        previousBuffer_ = std::cin.rdbuf(input_.rdbuf());
-    }
-    ~CinRedirectGuard() { std::cin.rdbuf(previousBuffer_); }
+using Tests::CinRedirectGuard;
+using Tests::CoutRedirectGuard;
 
-private:
-    std::istringstream input_;
-    std::streambuf* previousBuffer_;
-};
-
-class CoutRedirectGuard {
-public:
-    CoutRedirectGuard() { previousBuffer_ = std::cout.rdbuf(captured_.rdbuf()); }
-    ~CoutRedirectGuard() { std::cout.rdbuf(previousBuffer_); }
-    std::string Captured() const { return captured_.str(); }
-
-private:
-    std::ostringstream captured_;
-    std::streambuf* previousBuffer_;
-};
-
-class OrderManagementSystemTest : public ::testing::Test {
+class OrderManagementSystemTest : public Tests::TempFileFixture {
 protected:
-    std::string samplesPath = "data/test_system_order_samples.json";
-    std::string ordersPath = "data/test_system_orders.json";
+    OrderManagementSystemTest()
+        : TempFileFixture(std::vector<std::string>{"data/test_system_order_samples.json", "data/test_system_orders.json"}),
+          samplesPath("data/test_system_order_samples.json"),
+          ordersPath("data/test_system_orders.json") {}
 
     void SetUp() override {
         Model::SampleRepository samples(samplesPath);
         samples.Add(Model::Sample("S-001", "Wafer-A", 10.0, 0.9, 20));
     }
 
-    void TearDown() override {
-        std::filesystem::remove(samplesPath);
-        std::filesystem::remove(ordersPath);
-    }
+    std::string samplesPath;
+    std::string ordersPath;
 };
 
 TEST_F(OrderManagementSystemTest, PlaceOrderEndToEndThroughRealConsoleFlowPersistsReservedOrder) {

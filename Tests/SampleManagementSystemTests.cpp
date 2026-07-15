@@ -1,10 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <iostream>
-#include <sstream>
-
 #include "Controller/SampleController.h"
 #include "Model/SampleRepository.h"
+#include "Tests/TestSupport/ConsoleRedirectGuard.h"
 #include "Tests/TestSupport/TempFileFixture.h"
 #include "View/SampleView.h"
 
@@ -16,28 +14,8 @@
 // how a real console session would be driven from the keyboard.
 namespace {
 
-class CinRedirectGuard {
-public:
-    explicit CinRedirectGuard(const std::string& scriptedInput) : input_(scriptedInput) {
-        previousBuffer_ = std::cin.rdbuf(input_.rdbuf());
-    }
-    ~CinRedirectGuard() { std::cin.rdbuf(previousBuffer_); }
-
-private:
-    std::istringstream input_;
-    std::streambuf* previousBuffer_;
-};
-
-class CoutRedirectGuard {
-public:
-    CoutRedirectGuard() { previousBuffer_ = std::cout.rdbuf(captured_.rdbuf()); }
-    ~CoutRedirectGuard() { std::cout.rdbuf(previousBuffer_); }
-    std::string Captured() const { return captured_.str(); }
-
-private:
-    std::ostringstream captured_;
-    std::streambuf* previousBuffer_;
-};
+using Tests::CinRedirectGuard;
+using Tests::CoutRedirectGuard;
 
 class SampleManagementSystemTest : public Tests::TempFileFixture {
 protected:
