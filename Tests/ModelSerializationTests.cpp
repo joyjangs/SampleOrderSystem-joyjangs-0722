@@ -43,6 +43,89 @@ TEST(SampleTest, ToJsonFromJsonRoundTrips) {
     EXPECT_EQ(restored.GetStock(), 50);
 }
 
+// --- Phase 1 §6.1: Model::Sample validation / TryCreate ---
+
+TEST(SampleTryCreateTest, ValidValuesSucceedAndFieldsAreStoredAsGiven) {
+    auto sample = Model::Sample::TryCreate("S-001", "Wafer-A", 10.0, 0.9);
+
+    ASSERT_TRUE(sample.has_value());
+    EXPECT_EQ(sample->GetId(), "S-001");
+    EXPECT_EQ(sample->GetName(), "Wafer-A");
+    EXPECT_DOUBLE_EQ(sample->GetAvgProductionTime(), 10.0);
+    EXPECT_DOUBLE_EQ(sample->GetYieldRate(), 0.9);
+}
+
+TEST(SampleTryCreateTest, StockDefaultsToZeroOnRegistration) {
+    auto sample = Model::Sample::TryCreate("S-001", "Wafer-A", 10.0, 0.9);
+
+    ASSERT_TRUE(sample.has_value());
+    EXPECT_EQ(sample->GetStock(), 0);
+}
+
+TEST(SampleTryCreateTest, YieldRateOfOneIsAllowed) {
+    EXPECT_TRUE(Model::Sample::TryCreate("S-001", "Wafer-A", 10.0, 1.0).has_value());
+}
+
+TEST(SampleTryCreateTest, YieldRateOfZeroIsRejectedToAvoidDivisionByZeroLater) {
+    // PRD 7.4 / Phase1 §5: actualQuantity = ceil(shortage / yieldRate) would
+    // divide by zero in Phase 3 if yieldRate == 0 were allowed through here.
+    EXPECT_FALSE(Model::Sample::TryCreate("S-001", "Wafer-A", 10.0, 0.0).has_value());
+}
+
+TEST(SampleTryCreateTest, YieldRateAboveOneIsRejected) {
+    EXPECT_FALSE(Model::Sample::TryCreate("S-001", "Wafer-A", 10.0, 1.0001).has_value());
+}
+
+TEST(SampleTryCreateTest, NegativeYieldRateIsRejected) {
+    EXPECT_FALSE(Model::Sample::TryCreate("S-001", "Wafer-A", 10.0, -0.1).has_value());
+}
+
+TEST(SampleTryCreateTest, ZeroAvgProductionTimeIsRejected) {
+    EXPECT_FALSE(Model::Sample::TryCreate("S-001", "Wafer-A", 0.0, 0.9).has_value());
+}
+
+TEST(SampleTryCreateTest, NegativeAvgProductionTimeIsRejected) {
+    EXPECT_FALSE(Model::Sample::TryCreate("S-001", "Wafer-A", -1.0, 0.9).has_value());
+}
+
+TEST(SampleTryCreateTest, EmptyIdIsRejected) {
+    EXPECT_FALSE(Model::Sample::TryCreate("", "Wafer-A", 10.0, 0.9).has_value());
+}
+
+TEST(SampleTryCreateTest, WhitespaceOnlyIdIsRejected) {
+    EXPECT_FALSE(Model::Sample::TryCreate("   ", "Wafer-A", 10.0, 0.9).has_value());
+}
+
+TEST(SampleTryCreateTest, EmptyNameIsRejected) {
+    EXPECT_FALSE(Model::Sample::TryCreate("S-001", "", 10.0, 0.9).has_value());
+}
+
+TEST(SampleTryCreateTest, WhitespaceOnlyNameIsRejected) {
+    EXPECT_FALSE(Model::Sample::TryCreate("S-001", "   ", 10.0, 0.9).has_value());
+}
+
+TEST(SampleValidationHelperTest, IsValidYieldRateBoundaries) {
+    EXPECT_FALSE(Model::Sample::IsValidYieldRate(0.0));
+    EXPECT_TRUE(Model::Sample::IsValidYieldRate(1.0));
+    EXPECT_FALSE(Model::Sample::IsValidYieldRate(1.0001));
+    EXPECT_FALSE(Model::Sample::IsValidYieldRate(-0.5));
+}
+
+TEST(SampleValidationHelperTest, IsValidAvgProductionTimeBoundaries) {
+    EXPECT_FALSE(Model::Sample::IsValidAvgProductionTime(0.0));
+    EXPECT_FALSE(Model::Sample::IsValidAvgProductionTime(-1.0));
+    EXPECT_TRUE(Model::Sample::IsValidAvgProductionTime(0.0001));
+}
+
+TEST(SampleValidationHelperTest, IsValidIdAndNameRejectBlankStrings) {
+    EXPECT_FALSE(Model::Sample::IsValidId(""));
+    EXPECT_FALSE(Model::Sample::IsValidId("  \t "));
+    EXPECT_TRUE(Model::Sample::IsValidId("S-001"));
+    EXPECT_FALSE(Model::Sample::IsValidName(""));
+    EXPECT_FALSE(Model::Sample::IsValidName("  \t "));
+    EXPECT_TRUE(Model::Sample::IsValidName("Wafer-A"));
+}
+
 TEST(OrderTest, AllStatusValuesRoundTripThroughJsonString) {
     const Model::OrderStatus statuses[] = {Model::OrderStatus::Reserved, Model::OrderStatus::Rejected,
                                             Model::OrderStatus::Producing, Model::OrderStatus::Confirmed,
