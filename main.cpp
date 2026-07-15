@@ -7,14 +7,18 @@
 #include <gtest/gtest.h>
 #endif
 
+#include <map>
 #include <string>
 
 #include "Controller/MainMenuController.h"
+#include "Controller/OrderController.h"
 #include "Controller/SampleController.h"
 #include "Model/OrderRepository.h"
+#include "Model/OrderService.h"
 #include "Model/ProductionJobRepository.h"
 #include "Model/SampleRepository.h"
 #include "View/MainMenuView.h"
+#include "View/OrderView.h"
 #include "View/SampleView.h"
 
 namespace {
@@ -31,8 +35,13 @@ void RunApp() {
     View::SampleView sampleView;
     Controller::SampleController sampleController(sampleRepository, sampleView);
 
+    Model::OrderService orderService(sampleRepository, orderRepository);
+    View::OrderView orderView;
+    Controller::OrderController orderController(orderService, orderView);
+
     View::MainMenuView mainMenuView;
-    Controller::MainMenuController mainMenuController(mainMenuView, sampleController);
+    Controller::MainMenuController mainMenuController(
+        mainMenuView, {{"1", &sampleController}, {"2", &orderController}});
     mainMenuController.Run();
 }
 

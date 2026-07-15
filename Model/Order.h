@@ -32,6 +32,15 @@ public:
     Common::JsonValue ToJson() const;
     static Order FromJson(const Common::JsonValue& json);
 
+    static bool IsValidQuantity(int quantity);
+    static bool IsValidCustomerName(const std::string& customerName);
+
+    // Simple construction helper — does not validate (OrderService validates
+    // before calling), matching Sample::TryCreate's "Model never throws"
+    // convention for the eventual failure path, just at a different layer.
+    static Order CreateReserved(std::string orderId, std::string sampleId, std::string customerName,
+                                int quantity, std::string createdAt);
+
 private:
     std::string orderId_;
     std::string sampleId_;
