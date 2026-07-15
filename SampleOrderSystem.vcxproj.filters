@@ -54,6 +54,10 @@
     <ClCompile Include="Tests\ControllerTests.cpp" Filter="Tests" />
     <ClCompile Include="Tests\SampleControllerTests.cpp" Filter="Tests" />
     <ClCompile Include="Tests\SampleManagementSystemTests.cpp" Filter="Tests" />
+    <ClCompile Include="Tests\OrderTests.cpp" Filter="Tests" />
+    <ClCompile Include="Tests\OrderServiceTests.cpp" Filter="Tests" />
+    <ClCompile Include="Tests\OrderControllerTests.cpp" Filter="Tests" />
+    <ClCompile Include="Tests\OrderManagementSystemTests.cpp" Filter="Tests" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\Json.h" Filter="Common Files" />

@@ -180,6 +180,10 @@
     <ClCompile Include="Tests\ControllerTests.cpp" />
     <ClCompile Include="Tests\SampleControllerTests.cpp" />
     <ClCompile Include="Tests\SampleManagementSystemTests.cpp" />
+    <ClCompile Include="Tests\OrderTests.cpp" />
+    <ClCompile Include="Tests\OrderServiceTests.cpp" />
+    <ClCompile Include="Tests\OrderControllerTests.cpp" />
+    <ClCompile Include="Tests\OrderManagementSystemTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\Json.h" />
