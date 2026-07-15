@@ -65,12 +65,34 @@ TEST(OrderTest, UnknownStatusStringThrows) {
     EXPECT_THROW(Model::OrderStatusFromString("UNKNOWN"), std::invalid_argument);
 }
 
+TEST(OrderTest, EmptyStatusStringThrows) {
+    EXPECT_THROW(Model::OrderStatusFromString(""), std::invalid_argument);
+}
+
+TEST(OrderTest, LowercaseStatusStringIsRejected) {
+    // Status strings must match the PRD 8.2 canonical uppercase spelling
+    // exactly (defensive coding: lowercase variants are not silently accepted).
+    EXPECT_THROW(Model::OrderStatusFromString("reserved"), std::invalid_argument);
+}
+
+TEST(OrderTest, TimestampsRoundTripThroughJson) {
+    Model::Order order("ORD-20260416-0043", "S-001", "Acme", 50, Model::OrderStatus::Confirmed,
+                        "2026-04-16T10:00:00", "2026-04-16T11:30:00");
+
+    Model::Order restored = Model::Order::FromJson(order.ToJson());
+
+    EXPECT_EQ(restored.GetCreatedAt(), "2026-04-16T10:00:00");
+    EXPECT_EQ(restored.GetUpdatedAt(), "2026-04-16T11:30:00");
+}
+
 TEST(ProductionJobTest, StartedAtRoundTripsAsNullWhenQueued) {
     Model::ProductionJob queued("ORD-1", "S-001", 50, 100, 1000.0);
 
     Model::ProductionJob restored = Model::ProductionJob::FromJson(queued.ToJson());
 
     EXPECT_FALSE(restored.GetStartedAt().has_value());
+    EXPECT_EQ(restored.GetOrderId(), "ORD-1");
+    EXPECT_EQ(restored.GetSampleId(), "S-001");
     EXPECT_EQ(restored.GetShortage(), 50);
     EXPECT_EQ(restored.GetActualQuantity(), 100);
     EXPECT_DOUBLE_EQ(restored.GetEstimatedTime(), 1000.0);
@@ -83,4 +105,14 @@ TEST(ProductionJobTest, StartedAtRoundTripsAsValueWhenStarted) {
 
     ASSERT_TRUE(restored.GetStartedAt().has_value());
     EXPECT_EQ(*restored.GetStartedAt(), "2026-04-16T10:00:00");
+}
+
+TEST(ProductionJobTest, EstimatedTimeRoundTripsWithoutRoundingLoss) {
+    // Guards against precision loss (e.g. truncation to int) when a
+    // fractional estimatedTime is written/read via the JSON number path.
+    Model::ProductionJob job("ORD-3", "S-001", 7, 34, 123.456789);
+
+    Model::ProductionJob restored = Model::ProductionJob::FromJson(job.ToJson());
+
+    EXPECT_DOUBLE_EQ(restored.GetEstimatedTime(), 123.456789);
 }
