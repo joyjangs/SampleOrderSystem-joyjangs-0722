@@ -1,0 +1,23 @@
+# Visual Studio / MSBuild
+.vs/
+x64/
+x86/
+Win32/
+Debug/
+Release/
+*.vcxproj.user
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.opendb
+*.ipch
+*.log
+*.tlog
+*.obj
+*.ilk
+*.pdb
+*.idb
+*.exe
+*.recipe
