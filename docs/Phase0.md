@@ -68,22 +68,16 @@ Repository CRUD에 대한 단위 테스트가 통과한다.
 - [ ] 각 모델에 `ToJson()`/`FromJson()`(또는 자유 함수 `to_json`/`from_json`) 인터페이스를
       일관된 방식으로 정의 — Repository 계층에서 재사용
 
-### 2.3 JSON 라이브러리 확정 (TODO: 확인 필요)
+### 2.3 JSON 라이브러리 확정 (완료)
 
-- CLAUDE.md는 "사용할 JSON 라이브러리는 별도 PoC에서 검증된 방식을 재사용 — 예: nlohmann/json"
-  이라고만 명시하며, 현재 저장소에는 어떤 JSON 라이브러리도 포함되어 있지 않다. PoC 저장소는
-  `.claude`/git에 노출하지 않는 로컬 참고 자료이므로 이 문서에서 PoC의 구체 경로를 못박지
-  않는다.
-- **본 Phase 0 구현자(코딩 담당)에게 남기는 결정 사항**:
-  - nlohmann/json(헤더 온리, single header `json.hpp`)을 채택하는 것을 기본안으로 권장한다.
-    이유: 헤더 온리라 vcxproj에 NuGet/링크 설정 추가 부담이 없고, PoC에서 이미 검증된 방식과
-    가장 흔히 맞물리는 선택지이기 때문이다.
-  - 다만 실제 채택 전에 PoC(JsonPOC/DataPersistence, 로컬 참고 자료)에서 검증된 구체적
-    라이브러리/버전/통합 방식을 그대로 재사용할 수 있는지 먼저 확인하고, 있다면 그 방식을
-    우선한다 (CLAUDE.md 원칙: "선행 PoC에서 검증된 구조/기법을 그대로 활용").
-  - **TODO: 확인 필요** — 최종 채택 라이브러리명/버전/통합 방식(vendor 헤더 include vs
-    NuGet)은 구현 착수 시 확정하고, 확정 즉시 본 문서의 이 절과 `CLAUDE.md`의 "예:
-    nlohmann/json" 표현을 실제 채택 내용으로 갱신한다.
+- **확정된 방식**: 외부 라이브러리를 도입하지 않고 `Common::JsonValue`(재귀 하강 파서 +
+  직렬화기, null/bool/number/string/array/object 지원)를 직접 구현했다. 로컬 PoC에서 검증된
+  "의존성 없는 자체 JSON 파서" 방식을 재사용한 것이며(CLAUDE.md 원칙: "선행 PoC에서 검증된
+  구조/기법을 그대로 활용"), nlohmann/json 등 외부 헤더 온리 라이브러리는 채택하지 않았다.
+  vendor 헤더 추가나 NuGet 패키지 없이 `Common/Json.h`/`Common/Json.cpp` 두 파일만으로
+  완결된다.
+- 이 결정은 `CLAUDE.md`의 "데이터 영속성" 항목에도 반영되어 있다 — 더 이상 "예:
+  nlohmann/json" 같은 잠정 표현이 아니다.
 - 어떤 라이브러리를 쓰든 다음 제약은 고정한다:
   - 외부 라이브러리는 헤더 온리로 프로젝트에 포함하거나, NuGet 패키지로 `packages/`에
     받아 `packages.config`/`.vcxproj`에 반영한다 (gmock과 동일한 통합 패턴 유지).
@@ -117,7 +111,12 @@ Repository CRUD에 대한 단위 테스트가 통과한다.
 - [ ] `Controller/MainMenuController.h` / `.cpp`: 메인 메뉴 루프(입력 → 종료 조건 처리)의
       최소 골격. Phase 0 범위에서는 "종료" 선택지만 실제로 동작하면 충분하고, 나머지 메뉴
       항목은 "미구현" 안내만 출력해도 된다.
-- [ ] `main.cpp`: Repository 인스턴스 생성 → Controller에 주입 → `Run()` 호출
+- [x] `main.cpp`: Repository 인스턴스 생성 → `Run()` 호출. **범위 축소(확정)**: Phase 0의
+      `MainMenuController`는 아직 어떤 메뉴 항목도 Repository를 사용하지 않으므로(모든 하위
+      메뉴가 "미구현" 안내만 출력), Repository를 Controller에 실제로 주입하지 않는다.
+      `main.cpp`는 3개 Repository를 생성하고 `Load()`까지만 호출해 "재시작 시 로드" 요구사항을
+      만족시킨다. `IRepository<...>&`를 실제로 받는 배선은 이를 사용하는 첫 하위 메뉴가 생기는
+      Phase 1(시료 관리)에서 해당 Controller 생성자에 주입하는 시점에 도입한다.
 
 ## 3. 인터페이스 / 데이터 스키마
 
@@ -269,19 +268,22 @@ public:
 
 ## 7. 완료 조건 (Definition of Done)
 
-- [ ] `Model/`, `View/`, `Controller/` 폴더가 생성되고 `.vcxproj`/`.vcxproj.filters`에 반영됨
-- [ ] `Sample`/`Order`(+`OrderStatus`)/`ProductionJob` 클래스가 PRD 8장 필드와 일치하게
+- [x] `Model/`, `View/`, `Controller/`, `Common/` 폴더가 생성되고 `.vcxproj`/`.vcxproj.filters`에
+      반영됨
+- [x] `Sample`/`Order`(+`OrderStatus`)/`ProductionJob` 클래스가 PRD 8장 필드와 일치하게
       정의되고, JSON (역)직렬화가 가능함
-- [ ] JSON 라이브러리 채택이 확정되고 `CLAUDE.md`/본 문서에 실제 채택 내용이 반영됨
-      (더 이상 "예: nlohmann/json" 같은 잠정 표현이 아닌 확정 표현)
-- [ ] `SampleRepository`/`OrderRepository`/`ProductionJobRepository`가 CRUD를 지원하고,
+- [x] JSON 라이브러리 채택이 확정되고 `CLAUDE.md`/본 문서에 실제 채택 내용이 반영됨
+      (외부 라이브러리 없이 `Common::JsonValue` 자체 구현으로 확정 — 2.3절 참고)
+- [x] `SampleRepository`/`OrderRepository`/`ProductionJobRepository`가 CRUD를 지원하고,
       JSON 파일로 저장/로드됨
-- [ ] `SampleOrderSystemTests`(또는 동등한 이름의) 테스트 프로젝트가 `.slnx`에 추가되어
-      `packages/gmock.1.11.0`을 재사용해 빌드됨
-- [ ] `main.cpp`가 빌드되어 콘솔에서 실행되며 최소 메인 메뉴가 출력되고 정상 종료됨
-- [ ] 샘플 데이터 1건을 저장 → (프로세스 재시작을 흉내 낸) 재로드까지 동작하는 것이
+- [x] `SampleOrderSystemTests` 테스트 프로젝트가 `.slnx`에 추가되어 `packages/gmock.1.11.0`을
+      재사용해 빌드됨
+- [x] `main.cpp`가 빌드되어 콘솔에서 실행되며 최소 메인 메뉴가 출력되고 정상 종료됨
+      (Repository는 생성/`Load()`까지만 수행하고 Controller에는 아직 주입하지 않음 — 2.5절
+      "범위 축소" 참고, Phase 1에서 배선)
+- [x] 샘플 데이터 1건을 저장 → (프로세스 재시작을 흉내 낸) 재로드까지 동작하는 것이
       통합 테스트로 확인됨
-- [ ] `code-review` 에이전트 검토에서 MVC 의존 방향 위반, 심각한 SOLID 위반이 없다고
+- [x] `code-review` 에이전트 검토에서 MVC 의존 방향 위반, 심각한 SOLID 위반이 없다고
       확인됨 (경미한 개선 제안은 다음 Phase에서 반영 가능)
-- [ ] `tester` 에이전트가 위 6장 테스트를 작성 및 실행해 전부 통과함을 보고함
-- [ ] `supervisor` 에이전트가 위 산출물이 CLAUDE.md/PRD.md/PLAN.md/본 문서와 부합함을 확인함
+- [x] `tester` 에이전트가 위 6장 테스트를 작성 및 실행해 전부 통과함을 보고함 (35/35 통과)
+- [x] `supervisor` 에이전트가 위 산출물이 CLAUDE.md/PRD.md/PLAN.md/본 문서와 부합함을 확인함
