@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Model/MonitoringTypes.h"
+#include "Model/Monitoring/MonitoringTypes.h"
 
 namespace View {
 

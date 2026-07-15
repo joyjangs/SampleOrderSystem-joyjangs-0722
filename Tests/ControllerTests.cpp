@@ -2,10 +2,10 @@
 
 #include "Controller/ISubMenuController.h"
 #include "Controller/MainMenuController.h"
-#include "Model/MonitoringService.h"
-#include "Model/OrderRepository.h"
-#include "Model/ProductionJobRepository.h"
-#include "Model/SampleRepository.h"
+#include "Model/Monitoring/MonitoringService.h"
+#include "Model/Order/OrderRepository.h"
+#include "Model/Production/ProductionJobRepository.h"
+#include "Model/Sample/SampleRepository.h"
 #include "View/MainMenuView.h"
 
 namespace {

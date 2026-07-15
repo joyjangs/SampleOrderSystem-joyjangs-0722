@@ -3,8 +3,8 @@
 #include <regex>
 #include <vector>
 
-#include "Model/Order.h"
-#include "Model/OrderIdGenerator.h"
+#include "Model/Order/Order.h"
+#include "Model/Order/OrderIdGenerator.h"
 
 // Phase 2 §7.1: Model::Order validation helpers and the CreateReserved
 // factory (Order.h: "std::optional<Order> CreateReserved(...)" — never

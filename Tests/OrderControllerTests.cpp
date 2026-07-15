@@ -5,13 +5,13 @@
 #include <string>
 #include <vector>
 
-#include "Controller/OrderController.h"
-#include "Model/Order.h"
-#include "Model/OrderRepository.h"
-#include "Model/OrderService.h"
-#include "Model/Sample.h"
-#include "Model/SampleRepository.h"
-#include "View/OrderView.h"
+#include "Controller/Order/OrderController.h"
+#include "Model/Order/Order.h"
+#include "Model/Order/OrderRepository.h"
+#include "Model/Order/OrderService.h"
+#include "Model/Sample/Sample.h"
+#include "Model/Sample/SampleRepository.h"
+#include "View/Order/OrderView.h"
 
 // Phase 2 §7.2: OrderController::HandlePlaceOrder, exercised against a real
 // Model::OrderService backed by GMock repository doubles and a GMock

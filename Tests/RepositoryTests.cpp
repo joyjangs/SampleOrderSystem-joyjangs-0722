@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "Model/OrderRepository.h"
-#include "Model/ProductionJobRepository.h"
-#include "Model/SampleRepository.h"
+#include "Model/Order/OrderRepository.h"
+#include "Model/Production/ProductionJobRepository.h"
+#include "Model/Sample/SampleRepository.h"
 #include "Tests/TestSupport/TempFileFixture.h"
 
 namespace {

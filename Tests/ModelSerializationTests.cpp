@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
 #include "Common/Json.h"
-#include "Model/Order.h"
-#include "Model/OrderStatus.h"
-#include "Model/ProductionJob.h"
-#include "Model/Sample.h"
+#include "Model/Order/Order.h"
+#include "Model/Order/OrderStatus.h"
+#include "Model/Production/ProductionJob.h"
+#include "Model/Sample/Sample.h"
 
 TEST(JsonValueTest, RoundTripsObjectFields) {
     Common::JsonValue value = Common::JsonValue::MakeObject();

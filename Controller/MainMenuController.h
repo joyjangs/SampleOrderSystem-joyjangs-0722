@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Controller/ISubMenuController.h"
-#include "Model/MonitoringService.h"
+#include "Model/Monitoring/MonitoringService.h"
 #include "View/MainMenuView.h"
 
 namespace Controller {
