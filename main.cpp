@@ -14,8 +14,10 @@
 #include "Controller/OrderApprovalController.h"
 #include "Controller/OrderController.h"
 #include "Controller/ProductionLineController.h"
+#include "Controller/ReleaseController.h"
 #include "Controller/SampleController.h"
 #include "Model/OrderApprovalService.h"
+#include "Model/OrderReleaseService.h"
 #include "Model/OrderRepository.h"
 #include "Model/OrderService.h"
 #include "Model/ProductionJobRepository.h"
@@ -25,6 +27,7 @@
 #include "View/OrderApprovalView.h"
 #include "View/OrderView.h"
 #include "View/ProductionLineView.h"
+#include "View/ReleaseView.h"
 #include "View/SampleView.h"
 
 namespace {
@@ -56,12 +59,17 @@ void RunApp() {
     Controller::ProductionLineController productionLineController(productionLine, sampleRepository,
                                                                      orderRepository, productionLineView);
 
+    Model::OrderReleaseService orderReleaseService(sampleRepository, orderRepository);
+    View::ReleaseView releaseView;
+    Controller::ReleaseController releaseController(orderReleaseService, orderRepository, releaseView);
+
     View::MainMenuView mainMenuView;
     Controller::MainMenuController mainMenuController(
         mainMenuView, {{Controller::ToMenuOptionKey(Controller::MainMenuOption::SampleManagement), sampleController},
                        {Controller::ToMenuOptionKey(Controller::MainMenuOption::OrderPlacement), orderController},
                        {Controller::ToMenuOptionKey(Controller::MainMenuOption::OrderApproval), orderApprovalController},
-                       {Controller::ToMenuOptionKey(Controller::MainMenuOption::ProductionLine), productionLineController}});
+                       {Controller::ToMenuOptionKey(Controller::MainMenuOption::ProductionLine), productionLineController},
+                       {Controller::ToMenuOptionKey(Controller::MainMenuOption::Release), releaseController}});
     mainMenuController.Run();
 }
 
