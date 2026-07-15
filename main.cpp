@@ -11,11 +11,13 @@
 #include <string>
 
 #include "Controller/MainMenuController.h"
+#include "Controller/MonitoringController.h"
 #include "Controller/OrderApprovalController.h"
 #include "Controller/OrderController.h"
 #include "Controller/ProductionLineController.h"
 #include "Controller/ReleaseController.h"
 #include "Controller/SampleController.h"
+#include "Model/MonitoringService.h"
 #include "Model/OrderApprovalService.h"
 #include "Model/OrderReleaseService.h"
 #include "Model/OrderRepository.h"
@@ -24,6 +26,7 @@
 #include "Model/ProductionLine.h"
 #include "Model/SampleRepository.h"
 #include "View/MainMenuView.h"
+#include "View/MonitoringView.h"
 #include "View/OrderApprovalView.h"
 #include "View/OrderView.h"
 #include "View/ProductionLineView.h"
@@ -63,13 +66,19 @@ void RunApp() {
     View::ReleaseView releaseView;
     Controller::ReleaseController releaseController(orderReleaseService, orderRepository, releaseView);
 
+    Model::MonitoringService monitoringService(sampleRepository, orderRepository, productionJobRepository);
+    View::MonitoringView monitoringView;
+    Controller::MonitoringController monitoringController(monitoringService, monitoringView);
+
     View::MainMenuView mainMenuView;
     Controller::MainMenuController mainMenuController(
-        mainMenuView, {{Controller::ToMenuOptionKey(Controller::MainMenuOption::SampleManagement), sampleController},
-                       {Controller::ToMenuOptionKey(Controller::MainMenuOption::OrderPlacement), orderController},
-                       {Controller::ToMenuOptionKey(Controller::MainMenuOption::OrderApproval), orderApprovalController},
-                       {Controller::ToMenuOptionKey(Controller::MainMenuOption::ProductionLine), productionLineController},
-                       {Controller::ToMenuOptionKey(Controller::MainMenuOption::Release), releaseController}});
+        mainMenuView, monitoringService,
+        {{Controller::ToMenuOptionKey(Controller::MainMenuOption::SampleManagement), sampleController},
+         {Controller::ToMenuOptionKey(Controller::MainMenuOption::OrderPlacement), orderController},
+         {Controller::ToMenuOptionKey(Controller::MainMenuOption::OrderApproval), orderApprovalController},
+         {Controller::ToMenuOptionKey(Controller::MainMenuOption::Monitoring), monitoringController},
+         {Controller::ToMenuOptionKey(Controller::MainMenuOption::ProductionLine), productionLineController},
+         {Controller::ToMenuOptionKey(Controller::MainMenuOption::Release), releaseController}});
     mainMenuController.Run();
 }
 

@@ -4,6 +4,12 @@
 
 namespace View {
 
+void MainMenuView::PrintSummary(const Model::MainMenuSummary& summary) const {
+    std::cout << "\n[등록 시료 " << summary.registeredSampleCount << "종 | 총 재고 " << summary.totalStock
+              << " | 전체 주문 " << summary.totalOrderCount << "건 | 생산 대기 " << summary.productionQueueCount
+              << "건]\n";
+}
+
 void MainMenuView::ShowMainMenu() const {
     std::cout << "\n===== S-Semi 시료 생산주문관리 시스템 =====\n"
               << "1. 시료 관리\n"

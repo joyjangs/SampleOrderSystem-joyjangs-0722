@@ -5,6 +5,7 @@
 #include <string>
 
 #include "Controller/ISubMenuController.h"
+#include "Model/MonitoringService.h"
 #include "View/MainMenuView.h"
 
 namespace Controller {
@@ -34,7 +35,7 @@ std::string ToMenuOptionKey(MainMenuOption option);
 // a raw pointer) keeps the "always a valid controller" contract explicit.
 class MainMenuController {
 public:
-    MainMenuController(View::MainMenuView& view,
+    MainMenuController(View::MainMenuView& view, Model::MonitoringService& monitoringService,
                         std::map<std::string, std::reference_wrapper<ISubMenuController>> subMenuControllers);
 
     void Run();
@@ -43,6 +44,7 @@ public:
 
 private:
     View::MainMenuView& view_;
+    Model::MonitoringService& monitoringService_;
     std::map<std::string, std::reference_wrapper<ISubMenuController>> subMenuControllers_;
     bool isExitRequested_ = false;
 };

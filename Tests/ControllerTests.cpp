@@ -2,6 +2,10 @@
 
 #include "Controller/ISubMenuController.h"
 #include "Controller/MainMenuController.h"
+#include "Model/MonitoringService.h"
+#include "Model/OrderRepository.h"
+#include "Model/ProductionJobRepository.h"
+#include "Model/SampleRepository.h"
 #include "View/MainMenuView.h"
 
 namespace {
@@ -15,10 +19,21 @@ public:
 
 }  // namespace
 
-TEST(MainMenuControllerTest, HandleInputWithZeroRequestsExit) {
-    RunCountingSubMenuController sampleController;
+// HandleInput() itself never touches MonitoringService (only Run()'s
+// PrintSummary() call does), so these tests just need a valid reference to
+// construct MainMenuController — empty, never-loaded repositories are enough.
+class MainMenuControllerTest : public ::testing::Test {
+protected:
+    Model::SampleRepository sampleRepository{"data/test_mock_mainmenu_ctrl_samples_never_written.json"};
+    Model::OrderRepository orderRepository{"data/test_mock_mainmenu_ctrl_orders_never_written.json"};
+    Model::ProductionJobRepository productionJobRepository{"data/test_mock_mainmenu_ctrl_jobs_never_written.json"};
+    Model::MonitoringService monitoringService{sampleRepository, orderRepository, productionJobRepository};
     View::MainMenuView view;
-    Controller::MainMenuController controller(view, {{"1", sampleController}});
+};
+
+TEST_F(MainMenuControllerTest, HandleInputWithZeroRequestsExit) {
+    RunCountingSubMenuController sampleController;
+    Controller::MainMenuController controller(view, monitoringService, {{"1", sampleController}});
 
     EXPECT_FALSE(controller.IsExitRequested());
     controller.HandleInput("0");
@@ -26,12 +41,11 @@ TEST(MainMenuControllerTest, HandleInputWithZeroRequestsExit) {
     EXPECT_EQ(sampleController.runCount, 0);
 }
 
-TEST(MainMenuControllerTest, HandleInputDelegatesToTheRegisteredController) {
+TEST_F(MainMenuControllerTest, HandleInputDelegatesToTheRegisteredController) {
     RunCountingSubMenuController sampleController;
     RunCountingSubMenuController orderController;
-    View::MainMenuView view;
     Controller::MainMenuController controller(
-        view, {{"1", sampleController}, {"2", orderController}});
+        view, monitoringService, {{"1", sampleController}, {"2", orderController}});
 
     controller.HandleInput("1");
     controller.HandleInput("2");
@@ -42,10 +56,9 @@ TEST(MainMenuControllerTest, HandleInputDelegatesToTheRegisteredController) {
     EXPECT_EQ(orderController.runCount, 2);
 }
 
-TEST(MainMenuControllerTest, HandleInputWithUnregisteredKnownMenuNumberDoesNotDelegate) {
+TEST_F(MainMenuControllerTest, HandleInputWithUnregisteredKnownMenuNumberDoesNotDelegate) {
     RunCountingSubMenuController sampleController;
-    View::MainMenuView view;
-    Controller::MainMenuController controller(view, {{"1", sampleController}});
+    Controller::MainMenuController controller(view, monitoringService, {{"1", sampleController}});
 
     controller.HandleInput("3");
 

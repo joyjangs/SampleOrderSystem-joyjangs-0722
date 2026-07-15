@@ -169,18 +169,22 @@
     <ClCompile Include="Model\OrderApprovalService.cpp" />
     <ClCompile Include="Model\ProductionLine.cpp" />
     <ClCompile Include="Model\OrderReleaseService.cpp" />
+    <ClCompile Include="Model\MonitoringTypes.cpp" />
+    <ClCompile Include="Model\MonitoringService.cpp" />
     <ClCompile Include="View\MainMenuView.cpp" />
     <ClCompile Include="View\SampleView.cpp" />
     <ClCompile Include="View\OrderView.cpp" />
     <ClCompile Include="View\OrderApprovalView.cpp" />
     <ClCompile Include="View\ProductionLineView.cpp" />
     <ClCompile Include="View\ReleaseView.cpp" />
+    <ClCompile Include="View\MonitoringView.cpp" />
     <ClCompile Include="Controller\MainMenuController.cpp" />
     <ClCompile Include="Controller\SampleController.cpp" />
     <ClCompile Include="Controller\OrderController.cpp" />
     <ClCompile Include="Controller\OrderApprovalController.cpp" />
     <ClCompile Include="Controller\ProductionLineController.cpp" />
     <ClCompile Include="Controller\ReleaseController.cpp" />
+    <ClCompile Include="Controller\MonitoringController.cpp" />
   </ItemGroup>
   <!-- Debug-only: GoogleTest/GMock suite, built into this same exe and run
        via the "-test" command line flag (see main.cpp). Release never
@@ -218,18 +222,22 @@
     <ClInclude Include="Model\OrderApprovalService.h" />
     <ClInclude Include="Model\ProductionLine.h" />
     <ClInclude Include="Model\OrderReleaseService.h" />
+    <ClInclude Include="Model\MonitoringTypes.h" />
+    <ClInclude Include="Model\MonitoringService.h" />
     <ClInclude Include="View\MainMenuView.h" />
     <ClInclude Include="View\SampleView.h" />
     <ClInclude Include="View\OrderView.h" />
     <ClInclude Include="View\OrderApprovalView.h" />
     <ClInclude Include="View\ProductionLineView.h" />
     <ClInclude Include="View\ReleaseView.h" />
+    <ClInclude Include="View\MonitoringView.h" />
     <ClInclude Include="Controller\MainMenuController.h" />
     <ClInclude Include="Controller\SampleController.h" />
     <ClInclude Include="Controller\OrderController.h" />
     <ClInclude Include="Controller\OrderApprovalController.h" />
     <ClInclude Include="Controller\ProductionLineController.h" />
     <ClInclude Include="Controller\ReleaseController.h" />
+    <ClInclude Include="Controller\MonitoringController.h" />
     <ClInclude Include="Controller\ISubMenuController.h" />
     <ClInclude Include="Tests\TestSupport\TempFileFixture.h" />
     <ClInclude Include="Tests\TestSupport\ConsoleRedirectGuard.h" />
