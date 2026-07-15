@@ -1,13 +1,20 @@
 # Phase 3 — 주문 승인/거절 + 생산 큐 (핵심 비즈니스 로직)
 
-> 작성 시점 기준으로 `docs/Phase0.md`~`docs/Phase2.md`는 다른 작업자가 동시에 작성 중이라
-> 아직 확정되지 않았을 수 있다. 이 문서는 `docs/PLAN.md`의 Phase 0~2 설명(도메인 모델
-> `Sample`/`Order`/`ProductionJob`, JSON 기반 Repository, `RESERVED` 주문 생성)을 그대로
-> 전제로 삼는다. 만약 실제 Phase0~2 문서/구현이 여기서 가정한 시그니처와 다르게 확정되면
-> 본 Phase 착수 전에 이 문서의 "인터페이스/데이터 스키마" 절을 갱신해야 한다.
-> 실제 소스 트리(`Model/`, `View/`, `Controller/`)는 이 작성 시점에 전혀 존재하지 않는다
-> (Phase 0도 아직 구현 전). 따라서 아래 계획은 PRD/PLAN/CLAUDE.md에 근거한 설계 제안이며,
-> Phase 0~2 구현 결과에 따라 클래스명/필드명 등 세부 사항은 조정될 수 있다.
+> 이 문서는 Phase 0~2의 실제 구현(코드 확인 완료)을 전제로 삼는다. 실제 `Model::Sample`,
+> `Model::Order`/`OrderStatus`, `Model::ProductionJob`, `Model::*Repository`,
+> `Model::OrderService`, `Controller::ISubMenuController`/`MainMenuController`,
+> `Common::Clock`의 정확한 시그니처는 아래 "인터페이스/데이터 스키마" 절에 실제 코드와
+> 일치시켜 반영했다. Phase 3 구현 중 이 절과 실제 코드가 어긋나는 부분을 발견하면 이 문서를
+> 먼저 갱신한다.
+>
+> 핵심 확인 사항: **`Order`에는 아직 상태 전이 메서드(`Approve`/`Reject` 등)가 없고
+> `SetStatus(OrderStatus)`/`SetUpdatedAt(std::string)`라는 로우레벨 setter만 있다.** 따라서
+> Phase 3의 상태 전이 로직(RESERVED→REJECTED/CONFIRMED/PRODUCING, PRODUCING→CONFIRMED)은
+> `Order`에 새 멤버 메서드를 추가하는 대신 `Model::OrderApprovalService`(Phase 2의
+> `OrderService`와 동일한 패턴의 Model 계층 유스케이스 클래스)가 `SetStatus`/`SetUpdatedAt`을
+> 조합해 호출하고, 변경된 `Order` 값 복사본을 `OrderRepository::Update(order)`로 저장하는
+> 방식으로 확정한다(`FindAll`/`FindById`가 값 복사를 반환하므로 참조로 직접 수정 후 자동
+> 반영되지 않음에 유의). 아래 4.1/5.1절이 이 확정 사항을 반영한다.
 
 ## 1. 목표 요약 (PLAN.md 인용)
 
@@ -156,16 +163,25 @@ ApproveOrder(order, sample, allOrders):
 
 ### 4.1 Model
 
-- [ ] `Order`에 상태 전이 메서드 추가 (Phase 0/2에서 정의된 `Order` 클래스를 확장)
-  - `void Reject()` — `RESERVED`인 경우만 허용, `REJECTED`로 전이 + `updatedAt` 갱신
-  - `void ConfirmDirectly()` — `RESERVED` → `CONFIRMED` (재고 충분 케이스)
-  - `void MoveToProducing()` — `RESERVED` → `PRODUCING` (생산 큐 등록 케이스)
-  - `void CompleteProduction()` — `PRODUCING` → `CONFIRMED` (생산 완료 케이스, Phase 3 범위)
-  - 위 메서드들은 잘못된 상태에서 호출 시 예외/오류를 반환해 상태 흐름도(PRD 6.3)를 벗어나지
-    않게 한다.
-- [ ] `ProductionJob` 클래스 정의 (Phase 0에서 헤더만 선언됐다면 이 Phase에서 실제 로직 채움)
-  - 필드: `orderId`, `sampleId`, `shortage`, `actualQuantity`, `estimatedTime`, `startedAt`
-    (생산 시작 시각, 아래 "progress 갱신 방식 확정" 참고)
+- [ ] `Order` 상태 전이는 **`Order` 클래스에 새 메서드를 추가하지 않고** `OrderApprovalService`
+  (Model 계층 유스케이스 클래스, Phase 2의 `OrderService`와 동일 패턴)가 아래처럼 기존
+  `SetStatus(OrderStatus)`/`SetUpdatedAt(std::string)` setter만으로 조합해 처리한다(확정,
+  실제 코드 확인 결과 `Order`에는 `Reject`/`ConfirmDirectly`/`MoveToProducing`/
+  `CompleteProduction` 같은 상태 전이 메서드가 전혀 없고 로우레벨 setter뿐임):
+  - 거절: `RESERVED`인 경우만 허용 → `SetStatus(Rejected)` + `SetUpdatedAt(now)`
+  - 즉시 확정: `RESERVED` → `SetStatus(Confirmed)` + `SetUpdatedAt(now)` (재고 충분 케이스)
+  - 생산 큐 등록: `RESERVED` → `SetStatus(Producing)` + `SetUpdatedAt(now)`
+  - 생산 완료: `PRODUCING` → `SetStatus(Confirmed)` + `SetUpdatedAt(now)` (Phase 3 범위)
+  - 위 전이는 잘못된 상태에서 시도 시 예외/오류를 반환해 상태 흐름도(PRD 6.3)를 벗어나지
+    않게 하며, 반드시 변경된 `Order` 값 복사본을 `OrderRepository::Update(order)`로 저장해야
+    영속화된다(참조를 직접 수정해도 Repository 내부 저장소에는 반영되지 않음).
+- [ ] `ProductionJob`은 Phase 0/2에서 이미 실제 구현이 완료돼 있다(`Model/ProductionJob.h/.cpp`).
+  Phase 3은 이 기존 클래스를 그대로 사용하며 새로 정의하지 않는다.
+  - 필드: `orderId`, `sampleId`, `shortage`, `actualQuantity`, `estimatedTime`,
+    `startedAt`(`std::optional<std::string>`, ISO 8601 문자열 — `std::chrono::time_point`가
+    아님에 주의. `Common::Clock::CurrentTimestampIso8601()`로 채운다) — 이미 생성자/getter/
+    `SetStartedAt(std::optional<std::string>)`/`ToJson`/`FromJson`까지 구현되어 있으므로 Phase 3은
+    이 API를 그대로 사용한다(아래 "progress 갱신 방식 확정" 참고).
   - **progress 갱신 방식 확정**: `progress`는 별도 백그라운드 스레드/타이머로 자동 갱신되지
     않고, 저장된 상태 값도 아니다. "생산 라인 조회" 화면에 진입하거나 그 화면에서 새로고침을
     트리거하는 시점마다, 현재 시각과 해당 작업의 `startedAt`(생산 시작 시각)을 비교해 그때
@@ -174,47 +190,65 @@ ApproveOrder(order, sample, allOrders):
     progress = min(1.0, (now - startedAt) / estimatedTime)
     ```
     - `startedAt`은 해당 job이 큐의 맨 앞으로 나와 실제로 생산을 시작한 시각이며, 아직 대기
-      중(큐에서 순서를 기다리는 중)인 job은 `startedAt`이 없다(`std::optional` 또는 null).
-    - 이 계산은 순수 함수 `double ComputeProgress(const ProductionJob&, TimePoint now)`로
-      구현해 Model 계층에 둔다(뷰/컨트롤러에 로직이 섞이지 않도록).
-  - `bool IsComplete(TimePoint now) const` (또는 순수 함수) — `ComputeProgress(...) >= 1.0`
-    여부로 완료 판단
+      중(큐에서 순서를 기다리는 중)인 job은 `startedAt`이 없다(실제 필드 타입은
+      `std::optional<std::string>`, ISO 8601 문자열 — nullopt이면 대기 중).
+    - 이 계산은 순수 함수 `double ComputeProgress(const ProductionJob&, const std::string& nowIso8601)`
+      로 구현해 Model 계층에 둔다(뷰/컨트롤러에 로직이 섞이지 않도록). `now`도 `startedAt`과
+      같은 ISO 8601 문자열로 받아 내부에서 파싱해 경과 시간을 계산한다(`ProductionJob`이
+      `std::chrono::time_point`가 아닌 문자열 필드만 노출하므로, 굳이 `time_point`로 왕복
+      변환하지 않고 문자열 파싱 유틸을 Model 계층에 둔다).
+  - `bool IsComplete(const std::string& nowIso8601) const` (또는 순수 함수) —
+    `ComputeProgress(...) >= 1.0` 여부로 완료 판단
 - [ ] `AvailableStockCalculator` (또는 이에 준하는 순수 함수/서비스)
   - `int CalculateAvailableStock(const Sample& sample, const std::vector<Order>& orders)`
   - CONFIRMED/PRODUCING 상태 주문의 quantity 합을 물리적 stock에서 제외해 반환
   - 순수 함수로 구현해 단위 테스트 용이하게 함 (부작용 없음)
-- [ ] `OrderApprovalService` (Controller가 아닌 Model 계층의 도메인 서비스)
-  - `ApprovalResult Approve(Order& order, const Sample& sample, const std::vector<Order>& allOrders)`
+- [ ] `OrderApprovalService` (Controller가 아닌 Model 계층의 도메인 서비스, Phase 2
+  `OrderService`와 동일한 생성자 패턴 — `SampleRepository&`/`OrderRepository&`를 받음)
+  - `ApprovalResult Approve(const Order& order, const Sample& sample, const std::vector<Order>& allOrders)`
     - 내부에서 `AvailableStockCalculator` 호출 → shortage 계산 → 실 생산량/생산 시간 계산
-    - 재고 충분 시 `order.ConfirmDirectly()`만 호출하고 `ProductionJob`을 만들지 않음
-    - 재고 부족 시 `order.MoveToProducing()` + 생성된 `ProductionJob`을 반환(호출자가 큐에 push)
+    - 재고 충분 시: `order`의 복사본에 `SetStatus(OrderStatus::Confirmed)` +
+      `SetUpdatedAt(now)`를 적용해 `OrderRepository::Update(...)`로 저장하고,
+      `ProductionJob`은 만들지 않음
+    - 재고 부족 시: `order`의 복사본에 `SetStatus(OrderStatus::Producing)` +
+      `SetUpdatedAt(now)`를 적용해 `OrderRepository::Update(...)`로 저장하고, 생성된
+      `ProductionJob`을 반환(호출자 또는 서비스 내부가 큐에 push)
     - **주의**: 이 서비스는 물리적 `Sample::stock`을 변경하지 않는다 (읽기 전용 참조만 사용)
-  - `void Reject(Order& order)` — `order.Reject()` 위임 (검증 포함)
+  - `void Reject(const Order& order)` — `RESERVED` 검증 후 복사본에 `SetStatus(Rejected)` +
+    `SetUpdatedAt(now)`를 적용해 `OrderRepository::Update(...)`로 저장
 - [ ] `ProductionLine` (FIFO 큐 관리, Model 계층)
   - 내부 자료구조: `std::deque<ProductionJob>` 혹은 Repository가 관리하는 리스트(JSON 영속)
   - `void Enqueue(ProductionJob job)` — 큐가 비어 있던 상태에서 처음 push되는 job은 즉시
-    맨 앞(진행 중)이 되므로 이 시점에 `startedAt = now`를 설정한다. 이미 다른 job이 진행
-    중이면 `startedAt`은 설정하지 않고(대기 상태) 순서만 유지한다.
+    맨 앞(진행 중)이 되므로 이 시점에 `SetStartedAt(nowIso8601)`을 호출한다(`nowIso8601`은
+    `Common::Clock::CurrentTimestampIso8601()`로 얻음). 이미 다른 job이 진행 중이면
+    `startedAt`은 설정하지 않고(대기 상태, `nullopt` 유지) 순서만 유지한다.
   - `const ProductionJob* Peek() const` — 현재 진행 중(맨 앞) 작업 조회
   - `std::vector<ProductionJob> ListQueue() const` — 대기열 전체(진행 중 포함) 조회, FIFO 순서
     유지
-  - `double PeekProgress(TimePoint now) const` — 맨 앞 job에 대해 `ComputeProgress(...)`를
-    호출해 그 시점 기준 진행률을 반환 ("생산 라인 조회/새로고침" 시 이 함수를 사용)
+  - `double PeekProgress(const std::string& nowIso8601) const` — 맨 앞 job에 대해
+    `ComputeProgress(...)`를 호출해 그 시점 기준 진행률을 반환 ("생산 라인 조회/새로고침" 시
+    이 함수를 사용)
   - `void CompleteCurrentJob(SampleRepository&, OrderRepository&)` (또는 완료된 job을 반환하고
     호출자가 Repository 갱신을 책임지는 방식, 5.4절 참고)
     - 맨 앞 job을 꺼내 완료 처리: 해당 `Sample.stock += job.actualQuantity` (물리적 재고 갱신
-      은 여기서 최초로 발생), 해당 `orderId`의 Order를 `CompleteProduction()` 호출로
-      `PRODUCING → CONFIRMED` 전이, 큐에서 제거
+      은 여기서 최초로 발생, `SampleRepository::Update(...)`로 저장), 해당 `orderId`의
+      `Order`를 조회해 복사본에 `SetStatus(Confirmed)` + `SetUpdatedAt(now)`를 적용 후
+      `OrderRepository::Update(...)`로 저장(`PRODUCING → CONFIRMED` 전이), 큐에서 제거
     - 재계산 없음 — `job.actualQuantity`를 그대로 사용
-    - 다음 job이 큐에 남아 있다면 그 job의 `startedAt = now`를 설정해 진행을 이어간다
+    - 다음 job이 큐에 남아 있다면 그 job의 `SetStartedAt(nowIso8601)`을 호출해 진행을 이어간다
   - **완료 트리거 방식 확정**: 실시간 타이머로 자동 완료 처리하지 않는다. 사용자가 "생산 라인"
     화면에서 진행률이 100%(또는 경과 시간이 `estimatedTime` 이상)임을 확인한 뒤 "생산 완료
     처리" 메뉴를 선택해야 `CompleteCurrentJob`이 호출된다(수동 트리거). `progress` 자체는
     위에서 정의한 대로 조회 시점마다 파생 계산되므로, 진행 중 별도로 갱신할 값은 없다.
-- [ ] Repository 확장 (Phase 0에서 정의된 Repository 인터페이스에 맞춰)
-  - `ProductionJobRepository`(혹은 `ProductionLineRepository`)가 큐 상태를 JSON으로
-    저장/로드해 재시작 후에도 대기열이 복원되도록 함 (CLAUDE.md 영속성 요구사항)
-  - `OrderRepository::Update(order)` — 상태 변경 반영 후 저장
+- [ ] Repository 재사용 (Phase 0/2에서 이미 구현 완료, 새로 만들 필요 없음)
+  - `Model::ProductionJobRepository`(`Model/ProductionJobRepository.h`, `data/production_jobs.json`
+    기본 경로)가 이미 `JsonFileRepository<ProductionJob>`를 상속해 큐 상태를 JSON으로
+    저장/로드하므로 Phase 3은 이를 그대로 사용해 재시작 후에도 대기열이 복원되도록 함
+    (CLAUDE.md 영속성 요구사항). `FindAll()`이 저장 순서를 그대로 반환하므로 FIFO 순서 복원에
+    별도 정렬 필드가 필요 없다(입력 순서 = 큐 순서라는 전제를 유지해야 함).
+  - `Model::OrderRepository::Update(order)` — 상태 변경 반영 후 저장(이미 구현되어 있음, 값
+    복사본을 통째로 교체하는 방식이므로 반드시 변경된 필드를 모두 반영한 `Order` 객체를
+    넘겨야 함)
 
 ### 4.2 Controller
 
@@ -237,6 +271,13 @@ ApproveOrder(order, sample, allOrders):
     반영한다. 별도 백그라운드 갱신 없이 이 재조회 시점에만 값이 갱신된다.
   - "생산 완료 처리"(또는 진행 트리거) 입력 처리 → `ProductionLine::CompleteCurrentJob` 호출 →
     관련 `Sample`/`Order` Repository 갱신 반영
+- [ ] `Controller::ISubMenuController`를 구현(`void Run() override`)해 `OrderApprovalController`/
+  `ProductionLineController`를 각각 만든다(Phase 1/2의 `SampleController`/`OrderController`와
+  동일한 방식). `main.cpp`에서 `MainMenuController`를 생성할 때 넘기는
+  `std::map<std::string, std::reference_wrapper<ISubMenuController>>`에 `{"3", approvalController}`,
+  `{"5", productionLineController}`(PRD/PLAN에서 정한 메뉴 번호에 맞춰 조정)를 추가하기만 하면
+  되고, `MainMenuController` 클래스 자체는 이미 일반화된 map 기반 라우팅 구조라 수정할 필요가
+  없다(Phase 2 때와 달리 생성자 시그니처를 다시 바꿀 필요 없음).
 
 ### 4.3 View
 
@@ -256,42 +297,55 @@ ApproveOrder(order, sample, allOrders):
 
 ## 5. 인터페이스/데이터 스키마
 
-### 5.1 `Order` 확장 (Phase 0/2 스키마에 상태 전이 메서드 추가, 필드 변경 없음)
+### 5.1 `Order` 상태 전이 (실제 코드 확인 결과: `Order` 자체에는 전이 메서드가 없음)
+
+실제 `Model/Order.h`에는 `SetStatus(OrderStatus)`/`SetUpdatedAt(std::string)`라는 로우레벨
+setter만 있고, `Reject`/`ConfirmDirectly`/`MoveToProducing`/`CompleteProduction` 같은 상태
+전이 메서드는 없다. Phase 3은 `Order`에 새 메서드를 추가하지 않고 `OrderApprovalService`
+(5.3절)가 아래처럼 기존 API만으로 전이를 조합한다:
 
 ```cpp
-class Order {
-public:
-    // Phase 0/2에서 정의된 기존 필드: orderId, sampleId, customerName,
-    // quantity, status, createdAt, updatedAt
+// Order (기존 그대로, 변경 없음)
+const std::string& GetStatus() const;   // 실제로는 OrderStatus GetStatus() const
+void SetStatus(OrderStatus status);
+void SetUpdatedAt(std::string updatedAt);
 
-    void Reject();              // RESERVED -> REJECTED
-    void ConfirmDirectly();     // RESERVED -> CONFIRMED
-    void MoveToProducing();     // RESERVED -> PRODUCING
-    void CompleteProduction();  // PRODUCING -> CONFIRMED
-};
+// OrderApprovalService 내부에서의 전이 조합 예시(의사코드)
+Order updated = order;                                   // 값 복사(Repository와 동일 관례)
+updated.SetStatus(OrderStatus::Confirmed);                // 또는 Rejected/Producing
+updated.SetUpdatedAt(Common::Clock::CurrentTimestampIso8601());
+orderRepository.Update(updated);                          // 영속화(참조 직접 수정은 반영 안 됨)
 ```
 
-### 5.2 `ProductionJob` (PRD 8.3 기반, `startedAt` 필드 추가 — progress 갱신 방식 확정에 따름)
+### 5.2 `ProductionJob` (Phase 0/2에서 이미 구현 완료 — `Model/ProductionJob.h/.cpp`)
 
 `progress`는 저장 필드가 아니라 조회 시점마다 파생 계산되는 값으로 확정했다. 대신 계산의
-기준이 되는 "생산 시작 시각"(`startedAt`)을 저장한다.
+기준이 되는 "생산 시작 시각"(`startedAt`)을 저장한다. 실제 필드는 `std::optional<std::string>`
+(ISO 8601 문자열, `Common::Clock::CurrentTimestampIso8601()` 형식)이며 `std::chrono::time_point`가
+아니다.
 
 ```cpp
-struct ProductionJob {
-    std::string orderId;
-    std::string sampleId;
-    int shortage;          // 승인 시점 확정
-    int actualQuantity;    // ceil(shortage / yieldRate), 승인 시점 확정
-    double estimatedTime;  // avgProductionTime * actualQuantity, 승인 시점 확정
-    std::optional<std::chrono::system_clock::time_point> startedAt;
-    // 큐의 맨 앞으로 나와 실제 생산이 시작된 시각. 아직 대기 중인 job은 nullopt.
+// 실제 구현(Model/ProductionJob.h, 변경 없음 — Phase 3은 이 클래스를 그대로 사용)
+class ProductionJob {
+public:
+    ProductionJob(std::string orderId, std::string sampleId, int shortage, int actualQuantity,
+                  double estimatedTime, std::optional<std::string> startedAt = std::nullopt);
+
+    const std::string& GetOrderId() const;
+    const std::string& GetSampleId() const;
+    int GetShortage() const;
+    int GetActualQuantity() const;
+    double GetEstimatedTime() const;
+    const std::optional<std::string>& GetStartedAt() const;
+    void SetStartedAt(std::optional<std::string> startedAt);
+    // ToJson()/FromJson()도 이미 구현되어 있음
 };
 
-// progress는 저장하지 않고 조회 시점마다 이 순수 함수로 계산한다.
-double ComputeProgress(const ProductionJob& job,
-                        std::chrono::system_clock::time_point now);
+// progress는 저장하지 않고 조회 시점마다 이 순수 함수로 계산한다(Phase 3에서 신규 작성).
+double ComputeProgress(const ProductionJob& job, const std::string& nowIso8601);
 // startedAt이 nullopt(아직 대기 중)이면 0.0 반환,
-// 그 외에는 min(1.0, (now - startedAt) / estimatedTime) 반환.
+// 그 외에는 min(1.0, (now - startedAt) / estimatedTime) 반환(ISO 8601 문자열을 파싱해 초 단위
+// 경과 시간을 계산).
 ```
 
 JSON 스키마 예시 (PRD 8.3의 `progress` 필드는 `startedAt`으로 대체 — 조회 시점 재계산 방식이므로
@@ -310,6 +364,12 @@ progress 값 자체를 영속화할 필요가 없다):
 
 ### 5.3 도메인 서비스
 
+`OrderApprovalService`는 Phase 2의 `OrderService`와 동일한 생성자 패턴(`SampleRepository&`/
+`OrderRepository&`를 받는 Model 계층 유스케이스 클래스)을 따른다. `Order`에 상태 전이
+메서드가 없으므로 `order`는 `const&`로 받아 내부에서 값 복사 후 `SetStatus`/`SetUpdatedAt`을
+적용하고, 변경분은 `OrderRepository::Update(...)`로 저장한다(호출자가 참조로 넘긴 `order`
+자체는 변경되지 않는다는 점에 유의).
+
 ```cpp
 struct ApprovalResult {
     bool wasQueued;               // true면 PRODUCING(큐 등록), false면 CONFIRMED
@@ -318,9 +378,17 @@ struct ApprovalResult {
 
 class OrderApprovalService {
 public:
-    ApprovalResult Approve(Order& order, const Sample& sample,
+    OrderApprovalService(SampleRepository& sampleRepository, OrderRepository& orderRepository);
+
+    // order/sample/allOrders 모두 읽기 전용 참조 — 내부에서 값 복사 후
+    // SetStatus/SetUpdatedAt으로 전이한 뒤 OrderRepository::Update(...)로 저장한다.
+    ApprovalResult Approve(const Order& order, const Sample& sample,
                            const std::vector<Order>& allOrders);
-    void Reject(Order& order);
+    void Reject(const Order& order);
+
+private:
+    SampleRepository& sampleRepository_;
+    OrderRepository& orderRepository_;
 };
 
 int CalculateAvailableStock(const Sample& sample,
@@ -332,12 +400,13 @@ int CalculateAvailableStock(const Sample& sample,
 ```cpp
 class ProductionLine {
 public:
-    // 큐가 비어 있던 상태에서 push되면 즉시 startedAt = now로 설정(생산 시작)
+    // 큐가 비어 있던 상태에서 push되면 즉시 SetStartedAt(nowIso8601)로 설정(생산 시작)
     void Enqueue(ProductionJob job);
     const ProductionJob* Peek() const;
     const std::vector<ProductionJob>& ListQueue() const;
     // "생산 라인 조회/새로고침" 시점마다 호출 — 맨 앞 job의 진행률을 그 시점 기준으로 계산
-    double PeekProgress(std::chrono::system_clock::time_point now) const;
+    // (nowIso8601은 Common::Clock::CurrentTimestampIso8601() 형식의 문자열)
+    double PeekProgress(const std::string& nowIso8601) const;
     // 완료 처리는 Sample/Order 갱신까지 포함하므로 Repository를 인자로 받거나,
     // 완료된 job을 반환하고 Controller가 Repository 갱신을 책임지는 방식도 가능
     // (아래는 후자를 제안 — Model이 Repository를 직접 알 필요 없게 하기 위함)
@@ -347,9 +416,10 @@ public:
 ```
 
 - `ProductionLine::CompleteFrontJob()`이 완료된 job을 반환하면, 이를 호출한 Controller가
-  `Sample.stock += job.actualQuantity` 반영 및 `Order`를 조회해 `CompleteProduction()` 호출 →
-  각 Repository에 저장하는 흐름을 제안. (Model이 Repository에 의존하지 않도록 해 계층 의존
-  방향을 지킴 — CLAUDE.md MVC 원칙)
+  `Sample.stock += job.actualQuantity` 반영(`SampleRepository::Update(...)`) 및 해당 `orderId`의
+  `Order`를 조회해 복사본에 `SetStatus(Confirmed)` + `SetUpdatedAt(now)`를 적용한 뒤
+  `OrderRepository::Update(...)`로 저장하는 흐름을 제안. (Model이 Repository에 의존하지 않도록
+  해 계층 의존 방향을 지킴 — CLAUDE.md MVC 원칙)
 
 ---
 
@@ -385,6 +455,11 @@ public:
 ---
 
 ## 7. 테스트 계획 (tester 에이전트 작성 대상)
+
+> 실행 방식(Phase 0/1/2에서 확정): 별도 테스트 프로젝트를 만들지 않고 `Tests/*.cpp`에 GoogleTest/
+> GMock 테스트를 추가하면 `SampleOrderSystem.vcxproj`가 Debug 빌드에서만 조건부로 컴파일한다.
+> `SampleOrderSystem.exe --test`로 실행하면 콘솔 앱 대신 `RUN_ALL_TESTS()`가 실행된다(Release
+> 빌드는 테스트 소스를 아예 포함하지 않음). Phase 3 테스트도 이 방식을 그대로 따른다.
 
 ### 7.1 `CalculateAvailableStock` 단위 테스트
 
