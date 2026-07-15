@@ -21,3 +21,4 @@ Release/
 *.idb
 *.exe
 *.recipe
+*.json
