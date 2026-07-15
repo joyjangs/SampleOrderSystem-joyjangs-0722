@@ -10,6 +10,7 @@ namespace Controller {
 
 // The digit the user types at View::ProductionLineView::PromptMenuChoice().
 enum class ProductionLineMenuOption {
+    Exit = 0,
     Refresh = 1,
     CompleteJob = 2,
 };

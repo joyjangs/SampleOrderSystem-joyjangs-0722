@@ -11,11 +11,11 @@ SampleController::SampleController(Model::SampleRepository& repository, View::Sa
 void SampleController::Run() {
     while (true) {
         view_.ShowMenu();
-        int choice = view_.ReadMenuChoice();
-        if (choice == 0) {
+        auto choice = static_cast<SampleMenuOption>(view_.ReadMenuChoice());
+        if (choice == SampleMenuOption::Exit) {
             return;
         }
-        switch (static_cast<SampleMenuOption>(choice)) {
+        switch (choice) {
             case SampleMenuOption::Register: HandleRegister(); break;
             case SampleMenuOption::ListAll: HandleListAll(); break;
             case SampleMenuOption::Search: HandleSearchByName(); break;
