@@ -9,6 +9,22 @@
 
 namespace Controller {
 
+// PRD 7.1's full main menu (0=exit, 1~6=submenus).
+enum class MainMenuOption {
+    Exit = 0,
+    SampleManagement = 1,
+    OrderPlacement = 2,
+    OrderApproval = 3,
+    Monitoring = 4,
+    ProductionLine = 5,
+    Release = 6,
+};
+
+// Converts a MainMenuOption to the digit string a user types for it (e.g.
+// MainMenuOption::SampleManagement -> "1"). Used both to build the
+// subMenuControllers map keys (main.cpp) and to compare user input here.
+std::string ToMenuOptionKey(MainMenuOption option);
+
 // Routes a menu digit to its registered submenu controller (map keyed by the
 // digit string, e.g. "1" -> SampleController, "2" -> OrderController). Any
 // known-but-unregistered digit ("3"~"6" until their owning Phase wires them
