@@ -1,5 +1,7 @@
 #include "Model/Order.h"
 
+#include "Common/StringUtils.h"
+
 namespace Model {
 
 Order::Order(std::string orderId, std::string sampleId, std::string customerName, int quantity,
@@ -29,6 +31,21 @@ Order Order::FromJson(const Common::JsonValue& json) {
                  json.At("customerName").AsString(), json.At("quantity").AsInt(),
                  OrderStatusFromString(json.At("status").AsString()), json.At("createdAt").AsString(),
                  json.At("updatedAt").AsString());
+}
+
+bool Order::IsValidQuantity(int quantity) { return quantity >= 1; }
+
+bool Order::IsValidCustomerName(const std::string& customerName) { return !Common::IsBlank(customerName); }
+
+std::optional<Order> Order::CreateReserved(std::string orderId, std::string sampleId,
+                                           std::string customerName, int quantity,
+                                           std::string createdAt) {
+    if (!IsValidQuantity(quantity) || !IsValidCustomerName(customerName)) {
+        return std::nullopt;
+    }
+    std::string updatedAt = createdAt;
+    return Order(std::move(orderId), std::move(sampleId), std::move(customerName), quantity,
+                 OrderStatus::Reserved, std::move(createdAt), std::move(updatedAt));
 }
 
 }  // namespace Model

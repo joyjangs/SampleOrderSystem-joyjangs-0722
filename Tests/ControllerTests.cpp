@@ -18,7 +18,7 @@ public:
 TEST(MainMenuControllerTest, HandleInputWithZeroRequestsExit) {
     RunCountingSubMenuController sampleController;
     View::MainMenuView view;
-    Controller::MainMenuController controller(view, sampleController);
+    Controller::MainMenuController controller(view, {{"1", sampleController}});
 
     EXPECT_FALSE(controller.IsExitRequested());
     controller.HandleInput("0");
@@ -26,23 +26,28 @@ TEST(MainMenuControllerTest, HandleInputWithZeroRequestsExit) {
     EXPECT_EQ(sampleController.runCount, 0);
 }
 
-TEST(MainMenuControllerTest, HandleInputWithOneDelegatesToSampleController) {
+TEST(MainMenuControllerTest, HandleInputDelegatesToTheRegisteredController) {
     RunCountingSubMenuController sampleController;
+    RunCountingSubMenuController orderController;
     View::MainMenuView view;
-    Controller::MainMenuController controller(view, sampleController);
+    Controller::MainMenuController controller(
+        view, {{"1", sampleController}, {"2", orderController}});
 
     controller.HandleInput("1");
+    controller.HandleInput("2");
+    controller.HandleInput("2");
 
     EXPECT_FALSE(controller.IsExitRequested());
     EXPECT_EQ(sampleController.runCount, 1);
+    EXPECT_EQ(orderController.runCount, 2);
 }
 
-TEST(MainMenuControllerTest, HandleInputWithOtherKnownMenuNumberDoesNotDelegate) {
+TEST(MainMenuControllerTest, HandleInputWithUnregisteredKnownMenuNumberDoesNotDelegate) {
     RunCountingSubMenuController sampleController;
     View::MainMenuView view;
-    Controller::MainMenuController controller(view, sampleController);
+    Controller::MainMenuController controller(view, {{"1", sampleController}});
 
-    controller.HandleInput("2");
+    controller.HandleInput("3");
 
     EXPECT_FALSE(controller.IsExitRequested());
     EXPECT_EQ(sampleController.runCount, 0);
