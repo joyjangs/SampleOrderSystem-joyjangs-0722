@@ -68,6 +68,51 @@ TEST_F(SampleRepositoryTest, SurvivesReloadFromNewInstance) {
     EXPECT_EQ(found->GetStock(), 50);
 }
 
+TEST_F(SampleRepositoryTest, AddDoesNotRejectDuplicateId) {
+    // Regression test (Phase1 §2.1/§6.2): IRepository::Add is a plain push_back
+    // shared with Order/ProductionJob; it must NOT start rejecting duplicate
+    // ids on its own. Duplicate-id rejection is SampleController::HandleRegister's
+    // responsibility (via a FindById check before calling Add), not Repository's.
+    Model::SampleRepository repository(path);
+    repository.Add(Model::Sample("S-001", "SampleA", 10.0, 0.9, 50));
+
+    repository.Add(Model::Sample("S-001", "SampleA-Duplicate", 5.0, 0.5, 10));
+
+    EXPECT_EQ(repository.FindAll().size(), 2u);
+}
+
+TEST_F(SampleRepositoryTest, SearchByNameReturnsCaseInsensitivePartialMatches) {
+    Model::SampleRepository repository(path);
+    repository.Add(Model::Sample("S-001", "Wafer-A", 10.0, 0.9, 50));
+    repository.Add(Model::Sample("S-002", "wafer-B", 10.0, 0.9, 30));
+    repository.Add(Model::Sample("S-003", "Chip-C", 10.0, 0.9, 20));
+
+    auto results = repository.SearchByName("WAFER");
+
+    ASSERT_EQ(results.size(), 2u);
+    EXPECT_EQ(results[0].GetId(), "S-001");
+    EXPECT_EQ(results[1].GetId(), "S-002");
+}
+
+TEST_F(SampleRepositoryTest, SearchByNameMatchesSubstringNotJustPrefix) {
+    Model::SampleRepository repository(path);
+    repository.Add(Model::Sample("S-001", "Premium-Wafer-A", 10.0, 0.9, 50));
+
+    auto results = repository.SearchByName("wafer");
+
+    ASSERT_EQ(results.size(), 1u);
+    EXPECT_EQ(results[0].GetId(), "S-001");
+}
+
+TEST_F(SampleRepositoryTest, SearchByNameReturnsEmptyWhenNoMatch) {
+    Model::SampleRepository repository(path);
+    repository.Add(Model::Sample("S-001", "Wafer-A", 10.0, 0.9, 50));
+
+    auto results = repository.SearchByName("nonexistent");
+
+    EXPECT_TRUE(results.empty());
+}
+
 TEST_F(SampleRepositoryTest, PreservesInsertionOrderAcrossMultipleEntities) {
     {
         Model::SampleRepository repository(path);

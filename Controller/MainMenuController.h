@@ -2,15 +2,18 @@
 
 #include <string>
 
+#include "Controller/ISubMenuController.h"
 #include "View/MainMenuView.h"
 
 namespace Controller {
 
-// Phase 0 scope: the exit path ("0") is fully functional; every other menu
-// item just reports "not implemented" until its owning Phase fills it in.
+// "1" (시료 관리) delegates to the injected submenu controller; "2"~"6"
+// still report "not implemented" until their owning Phase fills them in.
+// Depends on ISubMenuController, not a concrete controller (DIP), so later
+// Phases can swap it without changing this class.
 class MainMenuController {
 public:
-    explicit MainMenuController(View::MainMenuView& view);
+    MainMenuController(View::MainMenuView& view, Controller::ISubMenuController& sampleController);
 
     void Run();
     void HandleInput(const std::string& input);
@@ -18,6 +21,7 @@ public:
 
 private:
     View::MainMenuView& view_;
+    Controller::ISubMenuController& sampleController_;
     bool isExitRequested_ = false;
 };
 

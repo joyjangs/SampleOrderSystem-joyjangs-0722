@@ -4,7 +4,18 @@
 
 namespace Controller {
 
-MainMenuController::MainMenuController(View::MainMenuView& view) : view_(view) {}
+namespace {
+constexpr const char* kExitOption = "0";
+constexpr const char* kSampleManagementOption = "1";
+constexpr const char* kOrderPlacementOption = "2";
+constexpr const char* kOrderApprovalOption = "3";
+constexpr const char* kMonitoringOption = "4";
+constexpr const char* kProductionLineOption = "5";
+constexpr const char* kReleaseOption = "6";
+}  // namespace
+
+MainMenuController::MainMenuController(View::MainMenuView& view, Controller::ISubMenuController& sampleController)
+    : view_(view), sampleController_(sampleController) {}
 
 void MainMenuController::Run() {
     while (!isExitRequested_) {
@@ -18,12 +29,17 @@ void MainMenuController::Run() {
 }
 
 void MainMenuController::HandleInput(const std::string& input) {
-    if (input == "0") {
+    if (input == kExitOption) {
         isExitRequested_ = true;
         view_.ShowExitMessage();
         return;
     }
-    if (input == "1" || input == "2" || input == "3" || input == "4" || input == "5" || input == "6") {
+    if (input == kSampleManagementOption) {
+        sampleController_.Run();
+        return;
+    }
+    if (input == kOrderPlacementOption || input == kOrderApprovalOption || input == kMonitoringOption ||
+        input == kProductionLineOption || input == kReleaseOption) {
         view_.ShowNotImplemented();
         return;
     }

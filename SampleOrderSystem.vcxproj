@@ -147,6 +147,9 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Common\Json.cpp" />
     <ClCompile Include="Model\OrderStatus.cpp" />
@@ -157,7 +160,20 @@
     <ClCompile Include="Model\OrderRepository.cpp" />
     <ClCompile Include="Model\ProductionJobRepository.cpp" />
     <ClCompile Include="View\MainMenuView.cpp" />
+    <ClCompile Include="View\SampleView.cpp" />
     <ClCompile Include="Controller\MainMenuController.cpp" />
+    <ClCompile Include="Controller\SampleController.cpp" />
+  </ItemGroup>
+  <!-- Debug-only: GoogleTest/GMock suite, built into this same exe and run
+       via the "-test" command line flag (see main.cpp). Release never
+       compiles these or links gtest/gmock (ExtensionTargets import below is
+       also Debug-only), so no test framework ships in a Release build. -->
+  <ItemGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile Include="Tests\ModelSerializationTests.cpp" />
+    <ClCompile Include="Tests\RepositoryTests.cpp" />
+    <ClCompile Include="Tests\ControllerTests.cpp" />
+    <ClCompile Include="Tests\SampleControllerTests.cpp" />
+    <ClCompile Include="Tests\SampleManagementSystemTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\Json.h" />
@@ -171,9 +187,19 @@
     <ClInclude Include="Model\OrderRepository.h" />
     <ClInclude Include="Model\ProductionJobRepository.h" />
     <ClInclude Include="View\MainMenuView.h" />
+    <ClInclude Include="View\SampleView.h" />
     <ClInclude Include="Controller\MainMenuController.h" />
+    <ClInclude Include="Controller\SampleController.h" />
+    <ClInclude Include="Controller\ISubMenuController.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\gmock.1.11.0\build\native\gmock.targets" Condition="'$(Configuration)'=='Debug' And Exists('packages\gmock.1.11.0\build\native\gmock.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>이 프로젝트는 이 컴퓨터에 없는 NuGet 패키지를 참조합니다. 해당 패키지를 다운로드하려면 NuGet 패키지 복원을 사용하십시오. 자세한 내용은 http://go.microsoft.com/fwlink/?LinkID=322105를 참조하십시오. 누락된 파일은 {0}입니다.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="'$(Configuration)'=='Debug' And !Exists('packages\gmock.1.11.0\build\native\gmock.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\gmock.1.11.0\build\native\gmock.targets'))" />
+  </Target>
 </Project>
