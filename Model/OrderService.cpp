@@ -25,8 +25,14 @@ PlaceOrderResult OrderService::PlaceOrder(const std::string& sampleId, const std
     const std::string orderId = idGenerator.GenerateNextId(orderRepository_.FindAll(), today);
     const std::string createdAt = Common::CurrentTimestampIso8601();
 
-    Order order = Order::CreateReserved(orderId, sampleId, customerName, quantity, createdAt);
-    orderRepository_.Add(order);
+    // Order::CreateReserved re-validates quantity/customerName itself (it
+    // never constructs an invalid Order for any caller, not just this one),
+    // so this can only fail here if it disagrees with the checks above.
+    std::optional<Order> order = Order::CreateReserved(orderId, sampleId, customerName, quantity, createdAt);
+    if (!order.has_value()) {
+        return PlaceOrderResult{false, std::nullopt, "주문 생성에 실패했습니다."};
+    }
+    orderRepository_.Add(*order);
 
     return PlaceOrderResult{true, order, ""};
 }

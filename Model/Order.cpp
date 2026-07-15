@@ -1,21 +1,8 @@
 #include "Model/Order.h"
 
-#include <cctype>
+#include "Common/StringUtils.h"
 
 namespace Model {
-
-namespace {
-
-bool IsBlank(const std::string& text) {
-    for (char c : text) {
-        if (!std::isspace(static_cast<unsigned char>(c))) {
-            return false;
-        }
-    }
-    return true;
-}
-
-}  // namespace
 
 Order::Order(std::string orderId, std::string sampleId, std::string customerName, int quantity,
              OrderStatus status, std::string createdAt, std::string updatedAt)
@@ -48,10 +35,14 @@ Order Order::FromJson(const Common::JsonValue& json) {
 
 bool Order::IsValidQuantity(int quantity) { return quantity >= 1; }
 
-bool Order::IsValidCustomerName(const std::string& customerName) { return !IsBlank(customerName); }
+bool Order::IsValidCustomerName(const std::string& customerName) { return !Common::IsBlank(customerName); }
 
-Order Order::CreateReserved(std::string orderId, std::string sampleId, std::string customerName,
-                            int quantity, std::string createdAt) {
+std::optional<Order> Order::CreateReserved(std::string orderId, std::string sampleId,
+                                           std::string customerName, int quantity,
+                                           std::string createdAt) {
+    if (!IsValidQuantity(quantity) || !IsValidCustomerName(customerName)) {
+        return std::nullopt;
+    }
     std::string updatedAt = createdAt;
     return Order(std::move(orderId), std::move(sampleId), std::move(customerName), quantity,
                  OrderStatus::Reserved, std::move(createdAt), std::move(updatedAt));

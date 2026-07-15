@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string>
 
 #include "Common/Json.h"
@@ -35,11 +36,14 @@ public:
     static bool IsValidQuantity(int quantity);
     static bool IsValidCustomerName(const std::string& customerName);
 
-    // Simple construction helper — does not validate (OrderService validates
-    // before calling), matching Sample::TryCreate's "Model never throws"
-    // convention for the eventual failure path, just at a different layer.
-    static Order CreateReserved(std::string orderId, std::string sampleId, std::string customerName,
-                                int quantity, std::string createdAt);
+    // Validates quantity/customerName itself and returns std::nullopt on
+    // failure (never throws) — same self-validating convention as
+    // Sample::TryCreate, so an Order can never be constructed in an invalid
+    // state regardless of caller (OrderService, a future dummy-data
+    // generator, etc.).
+    static std::optional<Order> CreateReserved(std::string orderId, std::string sampleId,
+                                               std::string customerName, int quantity,
+                                               std::string createdAt);
 
 private:
     std::string orderId_;

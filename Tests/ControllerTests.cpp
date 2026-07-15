@@ -18,7 +18,7 @@ public:
 TEST(MainMenuControllerTest, HandleInputWithZeroRequestsExit) {
     RunCountingSubMenuController sampleController;
     View::MainMenuView view;
-    Controller::MainMenuController controller(view, {{"1", &sampleController}});
+    Controller::MainMenuController controller(view, {{"1", sampleController}});
 
     EXPECT_FALSE(controller.IsExitRequested());
     controller.HandleInput("0");
@@ -31,7 +31,7 @@ TEST(MainMenuControllerTest, HandleInputDelegatesToTheRegisteredController) {
     RunCountingSubMenuController orderController;
     View::MainMenuView view;
     Controller::MainMenuController controller(
-        view, {{"1", &sampleController}, {"2", &orderController}});
+        view, {{"1", sampleController}, {"2", orderController}});
 
     controller.HandleInput("1");
     controller.HandleInput("2");
@@ -45,7 +45,7 @@ TEST(MainMenuControllerTest, HandleInputDelegatesToTheRegisteredController) {
 TEST(MainMenuControllerTest, HandleInputWithUnregisteredKnownMenuNumberDoesNotDelegate) {
     RunCountingSubMenuController sampleController;
     View::MainMenuView view;
-    Controller::MainMenuController controller(view, {{"1", &sampleController}});
+    Controller::MainMenuController controller(view, {{"1", sampleController}});
 
     controller.HandleInput("3");
 

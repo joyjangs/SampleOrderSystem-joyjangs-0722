@@ -11,8 +11,8 @@ constexpr const char* kExitOption = "0";
 constexpr const char* kAllMenuOptions[] = {"1", "2", "3", "4", "5", "6"};
 }  // namespace
 
-MainMenuController::MainMenuController(View::MainMenuView& view,
-                                        std::map<std::string, ISubMenuController*> subMenuControllers)
+MainMenuController::MainMenuController(
+    View::MainMenuView& view, std::map<std::string, std::reference_wrapper<ISubMenuController>> subMenuControllers)
     : view_(view), subMenuControllers_(std::move(subMenuControllers)) {}
 
 void MainMenuController::Run() {
@@ -35,7 +35,7 @@ void MainMenuController::HandleInput(const std::string& input) {
 
     auto it = subMenuControllers_.find(input);
     if (it != subMenuControllers_.end()) {
-        it->second->Run();
+        it->second.get().Run();
         return;
     }
 

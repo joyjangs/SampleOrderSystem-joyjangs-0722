@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <map>
 #include <string>
 
@@ -13,10 +14,12 @@ namespace Controller {
 // known-but-unregistered digit ("3"~"6" until their owning Phase wires them
 // up) reports "not implemented". Depends on ISubMenuController, not a
 // concrete controller (DIP), so registering a new submenu never requires
-// changing this class's constructor signature again.
+// changing this class's constructor signature again. reference_wrapper (not
+// a raw pointer) keeps the "always a valid controller" contract explicit.
 class MainMenuController {
 public:
-    MainMenuController(View::MainMenuView& view, std::map<std::string, ISubMenuController*> subMenuControllers);
+    MainMenuController(View::MainMenuView& view,
+                        std::map<std::string, std::reference_wrapper<ISubMenuController>> subMenuControllers);
 
     void Run();
     void HandleInput(const std::string& input);
@@ -24,7 +27,7 @@ public:
 
 private:
     View::MainMenuView& view_;
-    std::map<std::string, ISubMenuController*> subMenuControllers_;
+    std::map<std::string, std::reference_wrapper<ISubMenuController>> subMenuControllers_;
     bool isExitRequested_ = false;
 };
 

@@ -1,21 +1,8 @@
 #include "Model/Sample.h"
 
-#include <cctype>
+#include "Common/StringUtils.h"
 
 namespace Model {
-
-namespace {
-
-bool IsBlank(const std::string& text) {
-    for (char c : text) {
-        if (!std::isspace(static_cast<unsigned char>(c))) {
-            return false;
-        }
-    }
-    return true;
-}
-
-}  // namespace
 
 Sample::Sample(std::string id, std::string name, double avgProductionTime, double yieldRate, int stock)
     : id_(std::move(id)),
@@ -44,9 +31,9 @@ bool Sample::IsValidYieldRate(double yieldRate) { return yieldRate > 0.0 && yiel
 
 bool Sample::IsValidAvgProductionTime(double avgProductionTime) { return avgProductionTime > 0.0; }
 
-bool Sample::IsValidId(const std::string& id) { return !IsBlank(id); }
+bool Sample::IsValidId(const std::string& id) { return !Common::IsBlank(id); }
 
-bool Sample::IsValidName(const std::string& name) { return !IsBlank(name); }
+bool Sample::IsValidName(const std::string& name) { return !Common::IsBlank(name); }
 
 std::optional<Sample> Sample::TryCreate(std::string id, std::string name, double avgProductionTime,
                                         double yieldRate, int stock) {

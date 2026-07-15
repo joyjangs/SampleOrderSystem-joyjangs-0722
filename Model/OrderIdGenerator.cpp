@@ -1,6 +1,7 @@
 #include "Model/OrderIdGenerator.h"
 
 #include <algorithm>
+#include <charconv>
 #include <iomanip>
 #include <sstream>
 
@@ -12,8 +13,16 @@ std::string OrderIdGenerator::GenerateNextId(const std::vector<Order>& existingO
     int maxSequence = 0;
     for (const Order& order : existingOrders) {
         const std::string& id = order.GetOrderId();
-        if (id.compare(0, prefix.size(), prefix) == 0) {
-            maxSequence = std::max(maxSequence, std::stoi(id.substr(prefix.size())));
+        if (id.compare(0, prefix.size(), prefix) != 0) {
+            continue;
+        }
+        // Defends against hand-edited/corrupted data/orders.json: a
+        // non-numeric suffix is skipped instead of crashing the app.
+        const std::string suffix = id.substr(prefix.size());
+        int sequence = 0;
+        auto result = std::from_chars(suffix.data(), suffix.data() + suffix.size(), sequence);
+        if (result.ec == std::errc{}) {
+            maxSequence = std::max(maxSequence, sequence);
         }
     }
 

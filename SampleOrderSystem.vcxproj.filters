@@ -33,6 +33,7 @@
     <ClCompile Include="main.cpp" Filter="소스 파일" />
     <ClCompile Include="Common\Json.cpp" Filter="Common Files" />
     <ClCompile Include="Common\Clock.cpp" Filter="Common Files" />
+    <ClCompile Include="Common\StringUtils.cpp" Filter="Common Files" />
     <ClCompile Include="Model\OrderStatus.cpp" Filter="Model Files" />
     <ClCompile Include="Model\Sample.cpp" Filter="Model Files" />
     <ClCompile Include="Model\Order.cpp" Filter="Model Files" />
@@ -57,6 +58,7 @@
   <ItemGroup>
     <ClInclude Include="Common\Json.h" Filter="Common Files" />
     <ClInclude Include="Common\Clock.h" Filter="Common Files" />
+    <ClInclude Include="Common\StringUtils.h" Filter="Common Files" />
     <ClInclude Include="Model\OrderStatus.h" Filter="Model Files" />
     <ClInclude Include="Model\Sample.h" Filter="Model Files" />
     <ClInclude Include="Model\Order.h" Filter="Model Files" />
