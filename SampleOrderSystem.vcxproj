@@ -176,6 +176,7 @@
     <ClInclude Include="View\SampleView.h" />
     <ClInclude Include="Controller\MainMenuController.h" />
     <ClInclude Include="Controller\SampleController.h" />
+    <ClInclude Include="Controller\ISubMenuController.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

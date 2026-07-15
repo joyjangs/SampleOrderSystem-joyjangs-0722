@@ -13,11 +13,13 @@ public:
     void ShowMenu() const;
     int ReadMenuChoice() const;
 
-    // Returns false if any field fails to parse as the expected type
-    // (format error, not semantic validity — Model owns semantic validation).
+    // Re-prompts on a format error (e.g. non-numeric input) until it parses
+    // or the input stream is exhausted (EOF), in which case it returns false.
+    // Format errors are distinct from semantic validity, which Model owns.
     bool ReadRegistrationInput(std::string& id, std::string& name, double& avgProductionTime,
                                double& yieldRate) const;
     void ShowRegistrationResult(bool success, const std::string& message) const;
+    void ShowError(const std::string& message) const;
 
     void ShowSampleList(const std::vector<Model::Sample>& samples) const;
 

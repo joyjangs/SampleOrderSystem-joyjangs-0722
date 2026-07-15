@@ -25,6 +25,28 @@ int SampleView::ReadMenuChoice() const {
     return choice;
 }
 
+namespace {
+
+// Re-prompts on a parse failure until it succeeds or the stream hits EOF.
+// Returns false only on EOF (an interactive typo just re-prompts).
+bool ReadDoubleWithRetry(const std::string& prompt, double& value) {
+    while (true) {
+        std::cout << prompt;
+        if (std::cin >> value) {
+            return true;
+        }
+        if (std::cin.eof()) {
+            std::cin.clear();
+            return false;
+        }
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "숫자를 입력해주세요.\n";
+    }
+}
+
+}  // namespace
+
 bool SampleView::ReadRegistrationInput(std::string& id, std::string& name, double& avgProductionTime,
                                         double& yieldRate) const {
     std::cout << "시료 ID: ";
@@ -32,16 +54,10 @@ bool SampleView::ReadRegistrationInput(std::string& id, std::string& name, doubl
     std::cout << "시료명: ";
     std::getline(std::cin, name);
 
-    std::cout << "평균 생산시간(분/개): ";
-    if (!(std::cin >> avgProductionTime)) {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    if (!ReadDoubleWithRetry("평균 생산시간(분/개): ", avgProductionTime)) {
         return false;
     }
-    std::cout << "수율(0.0 초과 1.0 이하): ";
-    if (!(std::cin >> yieldRate)) {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    if (!ReadDoubleWithRetry("수율(0.0 초과 1.0 이하): ", yieldRate)) {
         return false;
     }
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -51,6 +67,8 @@ bool SampleView::ReadRegistrationInput(std::string& id, std::string& name, doubl
 void SampleView::ShowRegistrationResult(bool success, const std::string& message) const {
     std::cout << (success ? "등록 성공: " : "등록 실패: ") << message << "\n";
 }
+
+void SampleView::ShowError(const std::string& message) const { std::cout << message << "\n"; }
 
 namespace {
 

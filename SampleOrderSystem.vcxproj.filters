@@ -56,5 +56,6 @@
     <ClInclude Include="View\SampleView.h" Filter="View Files" />
     <ClInclude Include="Controller\MainMenuController.h" Filter="Controller Files" />
     <ClInclude Include="Controller\SampleController.h" Filter="Controller Files" />
+    <ClInclude Include="Controller\ISubMenuController.h" Filter="Controller Files" />
   </ItemGroup>
 </Project>

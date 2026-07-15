@@ -19,7 +19,7 @@ void SampleController::Run() {
             case 1: HandleRegister(); break;
             case 2: HandleListAll(); break;
             case 3: HandleSearchByName(); break;
-            default: view_.ShowRegistrationResult(false, "잘못된 선택입니다."); break;
+            default: view_.ShowError("잘못된 선택입니다."); break;
         }
     }
 }
