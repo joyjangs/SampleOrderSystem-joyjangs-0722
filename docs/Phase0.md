@@ -62,8 +62,9 @@ Repository CRUD에 대한 단위 테스트가 통과한다.
     책임이다. Phase 0은 데이터 구조와 (역)직렬화만 담당한다.
 - [ ] `Model/ProductionJob.h` / `ProductionJob.cpp`: `ProductionJob` 클래스
   - 필드: `orderId`(string), `sampleId`(string), `shortage`(int), `actualQuantity`(int),
-    `estimatedTime`(double), `progress`(double 또는 int, 0~100 등 단위는 Phase 3에서 확정.
-    Phase 0에서는 필드만 확보)
+    `estimatedTime`(double), `startedAt`(datetime, nullable — 생산 큐 대기 중이면 값 없음,
+    생산이 시작되면 시작 시각을 저장. 포맷은 3.2의 다른 datetime 필드와 동일한 규칙 적용)
+  - `progress`는 저장 필드로 두지 않는다.[^progress-derived]
 - [ ] 각 모델에 `ToJson()`/`FromJson()`(또는 자유 함수 `to_json`/`from_json`) 인터페이스를
       일관된 방식으로 정의 — Repository 계층에서 재사용
 
@@ -176,10 +177,15 @@ public:
     "shortage": 50,
     "actualQuantity": 100,
     "estimatedTime": 1000.0,
-    "progress": 0
+    "startedAt": null
   }
 ]
 ```
+
+[^progress-derived]: `progress`는 영속 필드가 아니다. Phase 3에서 확정된 설계에 따라
+    `startedAt`(nullable)만 저장하고, "생산 라인 조회" 시점마다 `ComputeProgress`(순수 함수,
+    `progress = min(1.0, (now - startedAt) / estimatedTime)`)로 파생 계산한다. 계산 로직의
+    세부 사항은 `docs/Phase3.md`를 참고한다.
 
 - `status` 필드는 PRD 8.2와 동일한 문자열 값(`RESERVED`/`REJECTED`/`PRODUCING`/`CONFIRMED`/
   `RELEASE`)을 그대로 사용해 JSON 가독성과 PRD 간 일관성을 유지한다.
@@ -229,7 +235,9 @@ public:
 - `Order`를 직렬화/역직렬화 시 `status` enum 값이 문자열로 정확히 왕복 변환되는지
   (`RESERVED`/`REJECTED`/`PRODUCING`/`CONFIRMED`/`RELEASE` 5개 모두)
 - `ProductionJob`의 모든 필드가 직렬화/역직렬화 후 동일한지 (수치 정밀도 포함,
-  `estimatedTime`이 double인 경우 반올림 오차 없이 왕복되는지)
+  `estimatedTime`이 double인 경우 반올림 오차 없이 왕복되는지), 특히 `startedAt`이 `null`(큐
+  대기 중)인 경우와 실제 시각 값이 채워진 경우 모두 정확히 저장/복원되는지 (`progress`는
+  저장 필드가 아니므로 직렬화 테스트 대상에서 제외한다)
 - 알 수 없는/잘못된 `status` 문자열이 들어온 경우의 처리(예외 또는 기본값) — 방어적 코딩
   검증
 
@@ -246,8 +254,9 @@ public:
 - **완료 기준 핵심 케이스**: `Sample` 1건을 생성 → `Save()` → Repository 인스턴스를
   새로 생성(재시작 흉내) → `Load()` → 동일한 `Sample`이 조회되는지
 - `Order`/`ProductionJob`에 대해서도 동일한 재시작 시나리오 적용 — 특히 `PRODUCING` 상태의
-  `Order`와 이에 연결된 `ProductionJob`(진행 중이던 `progress` 값 포함)이 재시작 후에도
-  그대로 복원되는지 (CLAUDE.md 영속성 요구사항 핵심 검증 포인트)
+  `Order`와 이에 연결된 `ProductionJob`(생산이 이미 시작되어 `startedAt`이 채워진 경우와
+  아직 큐 대기 중이라 `startedAt`이 `null`인 경우 모두)이 재시작 후에도 그대로 복원되는지
+  (CLAUDE.md 영속성 요구사항 핵심 검증 포인트)
 - 여러 건(3건 이상)을 저장 후 재로드했을 때 순서/개수가 보존되는지 (FIFO 큐 순서는 Phase
   3에서 본격 검증하지만, Phase 0에서는 최소한 저장 순서가 임의로 뒤섞이지 않는지만 확인)
 
