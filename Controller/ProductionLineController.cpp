@@ -22,10 +22,11 @@ void ProductionLineController::Run() {
         if (choice == 0) {
             return;
         }
-        if (choice == 1) {
+        auto option = static_cast<ProductionLineMenuOption>(choice);
+        if (option == ProductionLineMenuOption::Refresh) {
             continue;  // "새로고침": loop back to ShowStatus with a fresh "now".
         }
-        if (choice == 2) {
+        if (option == ProductionLineMenuOption::CompleteJob) {
             HandleCompleteCurrentJob();
             continue;
         }

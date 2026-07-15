@@ -49,8 +49,8 @@ void OrderApprovalController::HandleApproveOrReject() {
     const Model::Order& selected = reserved.front();
     view_.ShowNextToProcess(selected);
 
-    int decision = view_.PromptApproveOrReject();
-    if (decision == 1) {
+    auto decision = static_cast<ApprovalDecision>(view_.PromptApproveOrReject());
+    if (decision == ApprovalDecision::Approve) {
         Model::ApprovalResult result = approvalService_.Approve(selected);
         if (result.wasQueued) {
             productionLine_.Enqueue(*result.job);
@@ -59,7 +59,7 @@ void OrderApprovalController::HandleApproveOrReject() {
         } else {
             view_.ShowConfirmedImmediately(selected.GetOrderId());
         }
-    } else if (decision == 2) {
+    } else if (decision == ApprovalDecision::Reject) {
         approvalService_.Reject(selected);
         view_.ShowRejected(selected.GetOrderId());
     } else {

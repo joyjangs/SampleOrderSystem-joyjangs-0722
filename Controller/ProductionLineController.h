@@ -8,6 +8,12 @@
 
 namespace Controller {
 
+// The digit the user types at View::ProductionLineView::PromptMenuChoice().
+enum class ProductionLineMenuOption {
+    Refresh = 1,
+    CompleteJob = 2,
+};
+
 // PRD 7.6 production line: a repeating submenu (like SampleController) —
 // "새로고침" re-shows the current job/queue with progress recomputed for
 // "now", "생산 완료 처리" completes the front job and reflects it into

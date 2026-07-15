@@ -15,10 +15,10 @@ void SampleController::Run() {
         if (choice == 0) {
             return;
         }
-        switch (choice) {
-            case 1: HandleRegister(); break;
-            case 2: HandleListAll(); break;
-            case 3: HandleSearchByName(); break;
+        switch (static_cast<SampleMenuOption>(choice)) {
+            case SampleMenuOption::Register: HandleRegister(); break;
+            case SampleMenuOption::ListAll: HandleListAll(); break;
+            case SampleMenuOption::Search: HandleSearchByName(); break;
             default: view_.ShowError("잘못된 선택입니다."); break;
         }
     }
