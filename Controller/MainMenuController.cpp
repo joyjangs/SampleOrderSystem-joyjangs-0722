@@ -1,15 +1,20 @@
 #include "Controller/MainMenuController.h"
 
 #include <iostream>
+#include <string>
 
 namespace Controller {
 
 namespace {
-constexpr const char* kExitOption = "0";
 // PRD 7.1's full menu (1~6); options not present in subMenuControllers_ yet
 // report "not implemented" instead of "invalid selection".
-constexpr const char* kAllMenuOptions[] = {"1", "2", "3", "4", "5", "6"};
+constexpr MainMenuOption kAllMenuOptions[] = {
+    MainMenuOption::SampleManagement, MainMenuOption::OrderPlacement, MainMenuOption::OrderApproval,
+    MainMenuOption::Monitoring,       MainMenuOption::ProductionLine, MainMenuOption::Release,
+};
 }  // namespace
+
+std::string ToMenuOptionKey(MainMenuOption option) { return std::to_string(static_cast<int>(option)); }
 
 MainMenuController::MainMenuController(
     View::MainMenuView& view, std::map<std::string, std::reference_wrapper<ISubMenuController>> subMenuControllers)
@@ -27,7 +32,7 @@ void MainMenuController::Run() {
 }
 
 void MainMenuController::HandleInput(const std::string& input) {
-    if (input == kExitOption) {
+    if (input == ToMenuOptionKey(MainMenuOption::Exit)) {
         isExitRequested_ = true;
         view_.ShowExitMessage();
         return;
@@ -39,8 +44,8 @@ void MainMenuController::HandleInput(const std::string& input) {
         return;
     }
 
-    for (const char* option : kAllMenuOptions) {
-        if (input == option) {
+    for (MainMenuOption option : kAllMenuOptions) {
+        if (input == ToMenuOptionKey(option)) {
             view_.ShowNotImplemented();
             return;
         }

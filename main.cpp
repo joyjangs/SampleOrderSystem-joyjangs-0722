@@ -41,7 +41,8 @@ void RunApp() {
 
     View::MainMenuView mainMenuView;
     Controller::MainMenuController mainMenuController(
-        mainMenuView, {{"1", sampleController}, {"2", orderController}});
+        mainMenuView, {{Controller::ToMenuOptionKey(Controller::MainMenuOption::SampleManagement), sampleController},
+                       {Controller::ToMenuOptionKey(Controller::MainMenuOption::OrderPlacement), orderController}});
     mainMenuController.Run();
 }
 
