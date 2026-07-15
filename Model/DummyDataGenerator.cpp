@@ -1,6 +1,7 @@
 #include "Model/DummyDataGenerator.h"
 
 #include <algorithm>
+#include <cmath>
 #include <iomanip>
 #include <sstream>
 
@@ -15,6 +16,19 @@ const std::string kDummyCustomerNames[] = {"고객A", "고객B", "고객C", "고
 // (see DummyDataGenerator.h) so an already-saturated ID space fails fast.
 constexpr int kMinIdSearchAttempts = 100;
 constexpr int kIdSearchAttemptsPerSample = 10;
+
+// Sample::TryCreate accepts any double, but a raw uniform_real_distribution
+// draw has many more decimal digits than a real spec sheet ever would (e.g.
+// avg production time in whole minutes/tenths, yield rate as a percentage
+// to two decimals). Rounding here keeps dummy data readable without
+// touching Sample's own validation/storage.
+constexpr int kAvgProductionTimeDecimalPlaces = 1;
+constexpr int kYieldRateDecimalPlaces = 2;
+
+double RoundTo(double value, int decimalPlaces) {
+    const double factor = std::pow(10.0, decimalPlaces);
+    return std::round(value * factor) / factor;
+}
 }  // namespace
 
 DummyDataGenerator::DummyDataGenerator(SampleRepository& sampleRepository, OrderService& orderService)
@@ -46,8 +60,9 @@ void DummyDataGenerator::GenerateSamples(const DummyDataOptions& options, std::m
         }
 
         std::string name = "더미시료-" + std::to_string(i + 1);
-        std::optional<Sample> sample =
-            Sample::TryCreate(*id, name, avgTimeDist(rng), yieldDist(rng), stockDist(rng));
+        double avgProductionTime = RoundTo(avgTimeDist(rng), kAvgProductionTimeDecimalPlaces);
+        double yieldRate = RoundTo(yieldDist(rng), kYieldRateDecimalPlaces);
+        std::optional<Sample> sample = Sample::TryCreate(*id, name, avgProductionTime, yieldRate, stockDist(rng));
         if (!sample.has_value()) {
             result.failureReasons.push_back("더미 시료 생성에 실패했습니다: " + *id);
             continue;
