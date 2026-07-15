@@ -44,6 +44,10 @@ void ReleaseController::HandleRelease() {
     }
     const Model::Order& selected = confirmed[static_cast<std::size_t>(selection - 1)];
 
+    // Normal flow never throws here (the list is freshly filtered to
+    // CONFIRMED), but this is the only controller where the user picks an
+    // arbitrary index rather than a controller-forced target, so guard
+    // against a crash if that assumption ever breaks.
     try {
         releaseService_.Release(selected);
         view_.ShowReleaseSuccess(selected.GetOrderId());
