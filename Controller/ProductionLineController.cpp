@@ -16,6 +16,7 @@ ProductionLineController::ProductionLineController(Model::ProductionLine& produc
 
 void ProductionLineController::Run() {
     while (true) {
+        TryAutoCompleteFrontJob();
         ShowStatus();
         view_.ShowMenu();
         auto option = static_cast<ProductionLineMenuOption>(view_.PromptMenuChoice());
@@ -23,11 +24,7 @@ void ProductionLineController::Run() {
             return;
         }
         if (option == ProductionLineMenuOption::Refresh) {
-            continue;  // "새로고침": loop back to ShowStatus with a fresh "now".
-        }
-        if (option == ProductionLineMenuOption::CompleteJob) {
-            HandleCompleteCurrentJob();
-            continue;
+            continue;  // "새로고침": loop back, re-checking completion with a fresh "now".
         }
         view_.ShowInvalidSelection();
     }
@@ -39,29 +36,31 @@ void ProductionLineController::ShowStatus() const {
     view_.ShowQueue(productionLine_.ListQueue());
 }
 
-void ProductionLineController::HandleCompleteCurrentJob() {
-    std::optional<Model::ProductionJob> completed = productionLine_.CompleteFrontJob();
+void ProductionLineController::TryAutoCompleteFrontJob() {
+    const std::string now = Common::CurrentTimestampIso8601();
+    std::optional<Model::ProductionJob> completed = productionLine_.CompleteFrontJobIfDue(now);
     if (!completed.has_value()) {
-        view_.ShowNoJobToComplete();
         return;
     }
+    ApplyCompletion(*completed);
+    view_.ShowJobCompleted(completed->GetOrderId(), completed->GetActualQuantity());
+}
 
-    std::optional<Model::Sample> sample = sampleRepository_.FindById(completed->GetSampleId());
+void ProductionLineController::ApplyCompletion(const Model::ProductionJob& completed) {
+    std::optional<Model::Sample> sample = sampleRepository_.FindById(completed.GetSampleId());
     if (sample.has_value()) {
         Model::Sample updatedSample = *sample;
-        updatedSample.SetStock(updatedSample.GetStock() + completed->GetActualQuantity());
+        updatedSample.SetStock(updatedSample.GetStock() + completed.GetActualQuantity());
         sampleRepository_.Update(updatedSample);
     }
 
-    std::optional<Model::Order> order = orderRepository_.FindById(completed->GetOrderId());
+    std::optional<Model::Order> order = orderRepository_.FindById(completed.GetOrderId());
     if (order.has_value()) {
         Model::Order confirmed = *order;
         confirmed.SetStatus(Model::OrderStatus::Confirmed);
         confirmed.SetUpdatedAt(Common::CurrentTimestampIso8601());
         orderRepository_.Update(confirmed);
     }
-
-    view_.ShowJobCompleted(completed->GetOrderId(), completed->GetActualQuantity());
 }
 
 }  // namespace Controller

@@ -32,6 +32,14 @@ double ProductionLine::PeekProgress(const std::string& nowIso8601) const {
     return ComputeProgress(*front, nowIso8601);
 }
 
+std::optional<ProductionJob> ProductionLine::CompleteFrontJobIfDue(const std::string& nowIso8601) {
+    std::optional<ProductionJob> front = Peek();
+    if (!front.has_value() || !IsProductionComplete(*front, nowIso8601)) {
+        return std::nullopt;
+    }
+    return CompleteFrontJob();
+}
+
 std::optional<ProductionJob> ProductionLine::CompleteFrontJob() {
     std::optional<ProductionJob> completed = Peek();
     if (!completed.has_value()) {

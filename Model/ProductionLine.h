@@ -33,12 +33,18 @@ public:
     // the given moment; 0.0 if the queue is empty.
     double PeekProgress(const std::string& nowIso8601) const;
 
-    // Removes and returns the front job (std::nullopt if the queue was
-    // empty). If another job is now at the front, its startedAt is set to
-    // now so production continues immediately (no idle gap between jobs).
-    std::optional<ProductionJob> CompleteFrontJob();
+    // Completes the front job automatically once its progress (see
+    // Model/ProductionProgress.h) reaches 1.0 as of nowIso8601, and starts
+    // the next queued job immediately (no idle gap). Returns the completed
+    // job, or std::nullopt if there's no job in progress or it isn't done
+    // yet. There is no manual "force complete" — completion is always
+    // driven by elapsed real time, checked whenever the caller polls (e.g.
+    // on production line screen entry/refresh).
+    std::optional<ProductionJob> CompleteFrontJobIfDue(const std::string& nowIso8601);
 
 private:
+    std::optional<ProductionJob> CompleteFrontJob();
+
     ProductionJobRepository& repository_;
 };
 
