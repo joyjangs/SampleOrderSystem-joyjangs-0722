@@ -7,8 +7,8 @@ namespace View {
 void MonitoringView::PrintOrderStatusSummary(const Model::OrderStatusSummary& summary) const {
     std::cout << "\n--- 상태별 주문 건수 ---\n"
               << "RESERVED (접수): " << summary.reservedCount << "건\n"
-              << "PRODUCING (생산 중): " << summary.producingCount << "건\n"
               << "CONFIRMED (출고 대기): " << summary.confirmedCount << "건\n"
+              << "PRODUCING (생산 중): " << summary.producingCount << "건\n"
               << "RELEASE (출고 완료): " << summary.releaseCount << "건\n";
 }
 
