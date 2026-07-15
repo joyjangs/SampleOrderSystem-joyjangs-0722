@@ -154,6 +154,7 @@
     <ClCompile Include="Common\Json.cpp" />
     <ClCompile Include="Common\Clock.cpp" />
     <ClCompile Include="Common\StringUtils.cpp" />
+    <ClCompile Include="Common\ConsoleInput.cpp" />
     <ClCompile Include="Model\OrderStatus.cpp" />
     <ClCompile Include="Model\Sample.cpp" />
     <ClCompile Include="Model\Order.cpp" />
@@ -163,12 +164,20 @@
     <ClCompile Include="Model\ProductionJobRepository.cpp" />
     <ClCompile Include="Model\OrderIdGenerator.cpp" />
     <ClCompile Include="Model\OrderService.cpp" />
+    <ClCompile Include="Model\AvailableStockCalculator.cpp" />
+    <ClCompile Include="Model\ProductionProgress.cpp" />
+    <ClCompile Include="Model\OrderApprovalService.cpp" />
+    <ClCompile Include="Model\ProductionLine.cpp" />
     <ClCompile Include="View\MainMenuView.cpp" />
     <ClCompile Include="View\SampleView.cpp" />
     <ClCompile Include="View\OrderView.cpp" />
+    <ClCompile Include="View\OrderApprovalView.cpp" />
+    <ClCompile Include="View\ProductionLineView.cpp" />
     <ClCompile Include="Controller\MainMenuController.cpp" />
     <ClCompile Include="Controller\SampleController.cpp" />
     <ClCompile Include="Controller\OrderController.cpp" />
+    <ClCompile Include="Controller\OrderApprovalController.cpp" />
+    <ClCompile Include="Controller\ProductionLineController.cpp" />
   </ItemGroup>
   <!-- Debug-only: GoogleTest/GMock suite, built into this same exe and run
        via the "-test" command line flag (see main.cpp). Release never
@@ -189,6 +198,7 @@
     <ClInclude Include="Common\Json.h" />
     <ClInclude Include="Common\Clock.h" />
     <ClInclude Include="Common\StringUtils.h" />
+    <ClInclude Include="Common\ConsoleInput.h" />
     <ClInclude Include="Model\OrderStatus.h" />
     <ClInclude Include="Model\Sample.h" />
     <ClInclude Include="Model\Order.h" />
@@ -200,12 +210,20 @@
     <ClInclude Include="Model\ProductionJobRepository.h" />
     <ClInclude Include="Model\OrderIdGenerator.h" />
     <ClInclude Include="Model\OrderService.h" />
+    <ClInclude Include="Model\AvailableStockCalculator.h" />
+    <ClInclude Include="Model\ProductionProgress.h" />
+    <ClInclude Include="Model\OrderApprovalService.h" />
+    <ClInclude Include="Model\ProductionLine.h" />
     <ClInclude Include="View\MainMenuView.h" />
     <ClInclude Include="View\SampleView.h" />
     <ClInclude Include="View\OrderView.h" />
+    <ClInclude Include="View\OrderApprovalView.h" />
+    <ClInclude Include="View\ProductionLineView.h" />
     <ClInclude Include="Controller\MainMenuController.h" />
     <ClInclude Include="Controller\SampleController.h" />
     <ClInclude Include="Controller\OrderController.h" />
+    <ClInclude Include="Controller\OrderApprovalController.h" />
+    <ClInclude Include="Controller\ProductionLineController.h" />
     <ClInclude Include="Controller\ISubMenuController.h" />
     <ClInclude Include="Tests\TestSupport\TempFileFixture.h" />
     <ClInclude Include="Tests\TestSupport\ConsoleRedirectGuard.h" />

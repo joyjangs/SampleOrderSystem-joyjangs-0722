@@ -34,6 +34,7 @@
     <ClCompile Include="Common\Json.cpp" Filter="Common Files" />
     <ClCompile Include="Common\Clock.cpp" Filter="Common Files" />
     <ClCompile Include="Common\StringUtils.cpp" Filter="Common Files" />
+    <ClCompile Include="Common\ConsoleInput.cpp" Filter="Common Files" />
     <ClCompile Include="Model\OrderStatus.cpp" Filter="Model Files" />
     <ClCompile Include="Model\Sample.cpp" Filter="Model Files" />
     <ClCompile Include="Model\Order.cpp" Filter="Model Files" />
@@ -43,12 +44,20 @@
     <ClCompile Include="Model\ProductionJobRepository.cpp" Filter="Model Files" />
     <ClCompile Include="Model\OrderIdGenerator.cpp" Filter="Model Files" />
     <ClCompile Include="Model\OrderService.cpp" Filter="Model Files" />
+    <ClCompile Include="Model\AvailableStockCalculator.cpp" Filter="Model Files" />
+    <ClCompile Include="Model\ProductionProgress.cpp" Filter="Model Files" />
+    <ClCompile Include="Model\OrderApprovalService.cpp" Filter="Model Files" />
+    <ClCompile Include="Model\ProductionLine.cpp" Filter="Model Files" />
     <ClCompile Include="View\MainMenuView.cpp" Filter="View Files" />
     <ClCompile Include="View\SampleView.cpp" Filter="View Files" />
     <ClCompile Include="View\OrderView.cpp" Filter="View Files" />
+    <ClCompile Include="View\OrderApprovalView.cpp" Filter="View Files" />
+    <ClCompile Include="View\ProductionLineView.cpp" Filter="View Files" />
     <ClCompile Include="Controller\MainMenuController.cpp" Filter="Controller Files" />
     <ClCompile Include="Controller\SampleController.cpp" Filter="Controller Files" />
     <ClCompile Include="Controller\OrderController.cpp" Filter="Controller Files" />
+    <ClCompile Include="Controller\OrderApprovalController.cpp" Filter="Controller Files" />
+    <ClCompile Include="Controller\ProductionLineController.cpp" Filter="Controller Files" />
     <ClCompile Include="Tests\ModelSerializationTests.cpp" Filter="Tests" />
     <ClCompile Include="Tests\RepositoryTests.cpp" Filter="Tests" />
     <ClCompile Include="Tests\ControllerTests.cpp" Filter="Tests" />
@@ -63,6 +72,7 @@
     <ClInclude Include="Common\Json.h" Filter="Common Files" />
     <ClInclude Include="Common\Clock.h" Filter="Common Files" />
     <ClInclude Include="Common\StringUtils.h" Filter="Common Files" />
+    <ClInclude Include="Common\ConsoleInput.h" Filter="Common Files" />
     <ClInclude Include="Model\OrderStatus.h" Filter="Model Files" />
     <ClInclude Include="Model\Sample.h" Filter="Model Files" />
     <ClInclude Include="Model\Order.h" Filter="Model Files" />
@@ -74,12 +84,20 @@
     <ClInclude Include="Model\ProductionJobRepository.h" Filter="Model Files" />
     <ClInclude Include="Model\OrderIdGenerator.h" Filter="Model Files" />
     <ClInclude Include="Model\OrderService.h" Filter="Model Files" />
+    <ClInclude Include="Model\AvailableStockCalculator.h" Filter="Model Files" />
+    <ClInclude Include="Model\ProductionProgress.h" Filter="Model Files" />
+    <ClInclude Include="Model\OrderApprovalService.h" Filter="Model Files" />
+    <ClInclude Include="Model\ProductionLine.h" Filter="Model Files" />
     <ClInclude Include="View\MainMenuView.h" Filter="View Files" />
     <ClInclude Include="View\SampleView.h" Filter="View Files" />
     <ClInclude Include="View\OrderView.h" Filter="View Files" />
+    <ClInclude Include="View\OrderApprovalView.h" Filter="View Files" />
+    <ClInclude Include="View\ProductionLineView.h" Filter="View Files" />
     <ClInclude Include="Controller\MainMenuController.h" Filter="Controller Files" />
     <ClInclude Include="Controller\SampleController.h" Filter="Controller Files" />
     <ClInclude Include="Controller\OrderController.h" Filter="Controller Files" />
+    <ClInclude Include="Controller\OrderApprovalController.h" Filter="Controller Files" />
+    <ClInclude Include="Controller\ProductionLineController.h" Filter="Controller Files" />
     <ClInclude Include="Controller\ISubMenuController.h" Filter="Controller Files" />
   </ItemGroup>
 </Project>

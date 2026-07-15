@@ -11,14 +11,20 @@
 #include <string>
 
 #include "Controller/MainMenuController.h"
+#include "Controller/OrderApprovalController.h"
 #include "Controller/OrderController.h"
+#include "Controller/ProductionLineController.h"
 #include "Controller/SampleController.h"
+#include "Model/OrderApprovalService.h"
 #include "Model/OrderRepository.h"
 #include "Model/OrderService.h"
 #include "Model/ProductionJobRepository.h"
+#include "Model/ProductionLine.h"
 #include "Model/SampleRepository.h"
 #include "View/MainMenuView.h"
+#include "View/OrderApprovalView.h"
 #include "View/OrderView.h"
+#include "View/ProductionLineView.h"
 #include "View/SampleView.h"
 
 namespace {
@@ -39,10 +45,23 @@ void RunApp() {
     View::OrderView orderView;
     Controller::OrderController orderController(orderService, orderView);
 
+    Model::ProductionLine productionLine(productionJobRepository);
+
+    Model::OrderApprovalService orderApprovalService(sampleRepository, orderRepository);
+    View::OrderApprovalView orderApprovalView;
+    Controller::OrderApprovalController orderApprovalController(orderApprovalService, orderRepository,
+                                                                 productionLine, orderApprovalView);
+
+    View::ProductionLineView productionLineView;
+    Controller::ProductionLineController productionLineController(productionLine, sampleRepository,
+                                                                     orderRepository, productionLineView);
+
     View::MainMenuView mainMenuView;
     Controller::MainMenuController mainMenuController(
         mainMenuView, {{Controller::ToMenuOptionKey(Controller::MainMenuOption::SampleManagement), sampleController},
-                       {Controller::ToMenuOptionKey(Controller::MainMenuOption::OrderPlacement), orderController}});
+                       {Controller::ToMenuOptionKey(Controller::MainMenuOption::OrderPlacement), orderController},
+                       {Controller::ToMenuOptionKey(Controller::MainMenuOption::OrderApproval), orderApprovalController},
+                       {Controller::ToMenuOptionKey(Controller::MainMenuOption::ProductionLine), productionLineController}});
     mainMenuController.Run();
 }
 
