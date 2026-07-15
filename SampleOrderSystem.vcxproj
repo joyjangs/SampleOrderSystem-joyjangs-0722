@@ -207,6 +207,8 @@
     <ClInclude Include="Controller\SampleController.h" />
     <ClInclude Include="Controller\OrderController.h" />
     <ClInclude Include="Controller\ISubMenuController.h" />
+    <ClInclude Include="Tests\TestSupport\TempFileFixture.h" />
+    <ClInclude Include="Tests\TestSupport\ConsoleRedirectGuard.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,11 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <filesystem>
-#include <iostream>
-#include <sstream>
-
 #include "Controller/SampleController.h"
 #include "Model/SampleRepository.h"
+#include "Tests/TestSupport/ConsoleRedirectGuard.h"
+#include "Tests/TestSupport/TempFileFixture.h"
 #include "View/SampleView.h"
 
 // Phase 1 §6.5: end-to-end tests wiring the real SampleRepository (backed by
@@ -16,33 +14,12 @@
 // how a real console session would be driven from the keyboard.
 namespace {
 
-class CinRedirectGuard {
-public:
-    explicit CinRedirectGuard(const std::string& scriptedInput) : input_(scriptedInput) {
-        previousBuffer_ = std::cin.rdbuf(input_.rdbuf());
-    }
-    ~CinRedirectGuard() { std::cin.rdbuf(previousBuffer_); }
+using Tests::CinRedirectGuard;
+using Tests::CoutRedirectGuard;
 
-private:
-    std::istringstream input_;
-    std::streambuf* previousBuffer_;
-};
-
-class CoutRedirectGuard {
-public:
-    CoutRedirectGuard() { previousBuffer_ = std::cout.rdbuf(captured_.rdbuf()); }
-    ~CoutRedirectGuard() { std::cout.rdbuf(previousBuffer_); }
-    std::string Captured() const { return captured_.str(); }
-
-private:
-    std::ostringstream captured_;
-    std::streambuf* previousBuffer_;
-};
-
-class SampleManagementSystemTest : public ::testing::Test {
+class SampleManagementSystemTest : public Tests::TempFileFixture {
 protected:
-    std::string path = "data/test_system_samples.json";
-    void TearDown() override { std::filesystem::remove(path); }
+    SampleManagementSystemTest() : TempFileFixture("data/test_system_samples.json") {}
 };
 
 TEST_F(SampleManagementSystemTest, RegisterThenListThenSearchEndToEndThroughRealConsoleFlow) {
