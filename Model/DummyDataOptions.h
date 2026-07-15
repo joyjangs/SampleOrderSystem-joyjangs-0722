@@ -13,8 +13,12 @@ struct DummyDataOptions {
     double minYieldRate = 0.5;  // Sample::IsValidYieldRate requires 0.0 < x <= 1.0
     double maxYieldRate = 1.0;
 
-    double minAvgProductionTime = 1.0;  // Sample::IsValidAvgProductionTime requires > 0
-    double maxAvgProductionTime = 120.0;
+    // Kept small (rather than a realistic minutes-per-item value) so that
+    // ProductionJob.estimatedTime (avgProductionTime * actualQuantity, in
+    // minutes) stays short enough for system tests / manual runs to
+    // actually observe production completing.
+    double minAvgProductionTime = 0.1;  // Sample::IsValidAvgProductionTime requires > 0
+    double maxAvgProductionTime = 1.0;
 
     int minInitialStock = 0;
     int maxInitialStock = 100;
