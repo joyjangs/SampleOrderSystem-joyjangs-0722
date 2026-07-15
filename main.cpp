@@ -10,6 +10,7 @@
 #include <map>
 #include <string>
 
+#include "Controller/DummyDataController.h"
 #include "Controller/MainMenuController.h"
 #include "Controller/MonitoringController.h"
 #include "Controller/OrderApprovalController.h"
@@ -17,6 +18,7 @@
 #include "Controller/ProductionLineController.h"
 #include "Controller/ReleaseController.h"
 #include "Controller/SampleController.h"
+#include "Model/DummyDataGenerator.h"
 #include "Model/MonitoringService.h"
 #include "Model/OrderApprovalService.h"
 #include "Model/OrderReleaseService.h"
@@ -25,6 +27,7 @@
 #include "Model/ProductionJobRepository.h"
 #include "Model/ProductionLine.h"
 #include "Model/SampleRepository.h"
+#include "View/DummyDataView.h"
 #include "View/MainMenuView.h"
 #include "View/MonitoringView.h"
 #include "View/OrderApprovalView.h"
@@ -70,6 +73,10 @@ void RunApp() {
     View::MonitoringView monitoringView;
     Controller::MonitoringController monitoringController(monitoringService, monitoringView);
 
+    Model::DummyDataGenerator dummyDataGenerator(sampleRepository, orderService);
+    View::DummyDataView dummyDataView;
+    Controller::DummyDataController dummyDataController(dummyDataGenerator, dummyDataView);
+
     View::MainMenuView mainMenuView;
     Controller::MainMenuController mainMenuController(
         mainMenuView, monitoringService,
@@ -78,7 +85,8 @@ void RunApp() {
          {Controller::ToMenuOptionKey(Controller::MainMenuOption::OrderApproval), orderApprovalController},
          {Controller::ToMenuOptionKey(Controller::MainMenuOption::Monitoring), monitoringController},
          {Controller::ToMenuOptionKey(Controller::MainMenuOption::ProductionLine), productionLineController},
-         {Controller::ToMenuOptionKey(Controller::MainMenuOption::Release), releaseController}});
+         {Controller::ToMenuOptionKey(Controller::MainMenuOption::Release), releaseController},
+         {Controller::ToMenuOptionKey(Controller::MainMenuOption::DummyDataGeneration), dummyDataController}});
     mainMenuController.Run();
 }
 

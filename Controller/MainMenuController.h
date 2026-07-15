@@ -10,7 +10,8 @@
 
 namespace Controller {
 
-// PRD 7.1's full main menu (0=exit, 1~6=submenus).
+// PRD 7.1's full main menu (0=exit, 1~6=submenus), plus 7 for the
+// developer-convenience dummy-data menu (not part of PRD 7.1's numbered menu).
 enum class MainMenuOption {
     Exit = 0,
     SampleManagement = 1,
@@ -19,6 +20,7 @@ enum class MainMenuOption {
     Monitoring = 4,
     ProductionLine = 5,
     Release = 6,
+    DummyDataGeneration = 7,
 };
 
 // Converts a MainMenuOption to the digit string a user types for it (e.g.

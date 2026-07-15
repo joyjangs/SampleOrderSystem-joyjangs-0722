@@ -9,8 +9,9 @@ namespace {
 // PRD 7.1's full menu (1~6); options not present in subMenuControllers_ yet
 // report "not implemented" instead of "invalid selection".
 constexpr MainMenuOption kAllMenuOptions[] = {
-    MainMenuOption::SampleManagement, MainMenuOption::OrderPlacement, MainMenuOption::OrderApproval,
-    MainMenuOption::Monitoring,       MainMenuOption::ProductionLine, MainMenuOption::Release,
+    MainMenuOption::SampleManagement, MainMenuOption::OrderPlacement,     MainMenuOption::OrderApproval,
+    MainMenuOption::Monitoring,       MainMenuOption::ProductionLine,    MainMenuOption::Release,
+    MainMenuOption::DummyDataGeneration,
 };
 }  // namespace
 
