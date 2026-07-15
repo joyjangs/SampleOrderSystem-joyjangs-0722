@@ -3,7 +3,6 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
-#include <sstream>
 
 namespace View {
 
@@ -73,22 +72,13 @@ void SampleView::ShowError(const std::string& message) const { std::cout << mess
 
 namespace {
 
-// Formats a double with a fixed decimal precision for display (e.g. avg
-// production time to 1 decimal place, yield rate to 2) — Sample itself
-// stores the raw double; this is purely a console-rendering concern.
-std::string FormatFixed(double value, int precision) {
-    std::ostringstream oss;
-    oss << std::fixed << std::setprecision(precision) << value;
-    return oss.str();
-}
-
 void PrintSampleTable(const std::vector<Model::Sample>& samples) {
     std::cout << std::left << std::setw(10) << "ID" << std::setw(16) << "시료명" << std::setw(14)
               << "평균 생산시간" << std::setw(10) << "수율" << "재고" << "\n";
     for (const Model::Sample& sample : samples) {
         std::cout << std::left << std::setw(10) << sample.GetId() << std::setw(16) << sample.GetName()
-                  << std::setw(14) << FormatFixed(sample.GetAvgProductionTime(), 1) << std::setw(10)
-                  << FormatFixed(sample.GetYieldRate(), 2) << sample.GetStock() << "\n";
+                  << std::setw(14) << sample.GetAvgProductionTime() << std::setw(10) << sample.GetYieldRate()
+                  << sample.GetStock() << "\n";
     }
 }
 
