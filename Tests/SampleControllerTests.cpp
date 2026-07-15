@@ -5,10 +5,10 @@
 #include <string>
 #include <vector>
 
-#include "Controller/SampleController.h"
-#include "Model/Sample.h"
-#include "Model/SampleRepository.h"
-#include "View/SampleView.h"
+#include "Controller/Sample/SampleController.h"
+#include "Model/Sample/Sample.h"
+#include "Model/Sample/SampleRepository.h"
+#include "View/Sample/SampleView.h"
 
 // Phase 1 §6.3: SampleController is tested against GMock doubles for both of
 // its collaborators (Model::SampleRepository, View::SampleView) so we can

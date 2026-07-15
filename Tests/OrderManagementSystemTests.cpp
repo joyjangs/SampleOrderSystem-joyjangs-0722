@@ -2,14 +2,14 @@
 
 #include <regex>
 
-#include "Controller/OrderController.h"
-#include "Model/OrderRepository.h"
-#include "Model/OrderService.h"
-#include "Model/Sample.h"
-#include "Model/SampleRepository.h"
+#include "Controller/Order/OrderController.h"
+#include "Model/Order/OrderRepository.h"
+#include "Model/Order/OrderService.h"
+#include "Model/Sample/Sample.h"
+#include "Model/Sample/SampleRepository.h"
 #include "Tests/TestSupport/ConsoleRedirectGuard.h"
 #include "Tests/TestSupport/TempFileFixture.h"
-#include "View/OrderView.h"
+#include "View/Order/OrderView.h"
 
 // Phase 2 §7.2: end-to-end tests wiring the real SampleRepository/
 // OrderRepository (backed by temp JSON files), the real OrderService/

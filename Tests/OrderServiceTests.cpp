@@ -6,11 +6,11 @@
 #include <string>
 #include <vector>
 
-#include "Model/Order.h"
-#include "Model/OrderRepository.h"
-#include "Model/OrderService.h"
-#include "Model/Sample.h"
-#include "Model/SampleRepository.h"
+#include "Model/Order/Order.h"
+#include "Model/Order/OrderRepository.h"
+#include "Model/Order/OrderService.h"
+#include "Model/Sample/Sample.h"
+#include "Model/Sample/SampleRepository.h"
 
 // Phase 2 §7.1: Model::OrderService::PlaceOrder, exercised against GMock
 // doubles for both of its collaborators (SampleRepository, OrderRepository)

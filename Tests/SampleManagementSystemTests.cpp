@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "Controller/SampleController.h"
-#include "Model/SampleRepository.h"
+#include "Controller/Sample/SampleController.h"
+#include "Model/Sample/SampleRepository.h"
 #include "Tests/TestSupport/ConsoleRedirectGuard.h"
 #include "Tests/TestSupport/TempFileFixture.h"
-#include "View/SampleView.h"
+#include "View/Sample/SampleView.h"
 
 // Phase 1 §6.5: end-to-end tests wiring the real SampleRepository (backed by
 // a temp JSON file), the real SampleController and the real SampleView
