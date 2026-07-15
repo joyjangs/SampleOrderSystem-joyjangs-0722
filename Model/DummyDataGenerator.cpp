@@ -10,6 +10,11 @@ namespace Model {
 
 namespace {
 const std::string kDummyCustomerNames[] = {"고객A", "고객B", "고객C", "고객D", "고객E"};
+
+// Bounds FindNextAvailableSampleId's total scan across one Generate() call
+// (see DummyDataGenerator.h) so an already-saturated ID space fails fast.
+constexpr int kMinIdSearchAttempts = 100;
+constexpr int kIdSearchAttemptsPerSample = 10;
 }  // namespace
 
 DummyDataGenerator::DummyDataGenerator(SampleRepository& sampleRepository, OrderService& orderService)
@@ -31,7 +36,7 @@ void DummyDataGenerator::GenerateSamples(const DummyDataOptions& options, std::m
     std::uniform_int_distribution<int> stockDist(options.minInitialStock, options.maxInitialStock);
 
     int nextCandidate = 1;
-    int attemptsRemaining = std::max(100, options.sampleCount * 10);
+    int attemptsRemaining = std::max(kMinIdSearchAttempts, options.sampleCount * kIdSearchAttemptsPerSample);
 
     for (int i = 0; i < options.sampleCount; ++i) {
         std::optional<std::string> id = FindNextAvailableSampleId(nextCandidate, attemptsRemaining);

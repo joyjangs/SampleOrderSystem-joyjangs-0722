@@ -4,7 +4,7 @@ namespace Model {
 
 // Test/dev convenience input for DummyDataGenerator::Generate. A count of 0
 // means "generate none of that kind" (not "use a different default") — see
-// DummyDataGenerator.h for why 0 can't also mean "keep default".
+// View/DummyDataView.h for why 0 can't also mean "keep default".
 struct DummyDataOptions {
     int sampleCount = 5;
     int orderCount = 10;
