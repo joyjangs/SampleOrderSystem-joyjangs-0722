@@ -3,16 +3,21 @@
 #include <chrono>
 #include <ctime>
 #include <iomanip>
+#include <optional>
 #include <sstream>
+#include <stdexcept>
 
 namespace Common {
 
 namespace {
 
-std::tm ParseIso8601(const std::string& text) {
+std::optional<std::tm> ParseIso8601(const std::string& text) {
     std::tm parsed{};
     std::istringstream in(text);
     in >> std::get_time(&parsed, "%Y-%m-%dT%H:%M:%S");
+    if (in.fail()) {
+        return std::nullopt;
+    }
     return parsed;
 }
 
@@ -44,10 +49,13 @@ std::string CurrentDateYyyymmdd() {
 }
 
 double SecondsBetweenIso8601(const std::string& start, const std::string& end) {
-    std::tm startTm = ParseIso8601(start);
-    std::tm endTm = ParseIso8601(end);
-    std::time_t startTime = std::mktime(&startTm);
-    std::time_t endTime = std::mktime(&endTm);
+    std::optional<std::tm> startTm = ParseIso8601(start);
+    std::optional<std::tm> endTm = ParseIso8601(end);
+    if (!startTm.has_value() || !endTm.has_value()) {
+        throw std::invalid_argument("SecondsBetweenIso8601: invalid ISO 8601 timestamp");
+    }
+    std::time_t startTime = std::mktime(&*startTm);
+    std::time_t endTime = std::mktime(&*endTm);
     return std::difftime(endTime, startTime);
 }
 

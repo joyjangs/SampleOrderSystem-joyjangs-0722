@@ -154,6 +154,7 @@
     <ClCompile Include="Common\Json.cpp" />
     <ClCompile Include="Common\Clock.cpp" />
     <ClCompile Include="Common\StringUtils.cpp" />
+    <ClCompile Include="Common\ConsoleInput.cpp" />
     <ClCompile Include="Model\OrderStatus.cpp" />
     <ClCompile Include="Model\Sample.cpp" />
     <ClCompile Include="Model\Order.cpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="Common\Json.h" />
     <ClInclude Include="Common\Clock.h" />
     <ClInclude Include="Common\StringUtils.h" />
+    <ClInclude Include="Common\ConsoleInput.h" />
     <ClInclude Include="Model\OrderStatus.h" />
     <ClInclude Include="Model\Sample.h" />
     <ClInclude Include="Model\Order.h" />

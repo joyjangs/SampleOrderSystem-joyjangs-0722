@@ -2,25 +2,11 @@
 
 #include <iomanip>
 #include <iostream>
-#include <limits>
 
+#include "Common/ConsoleInput.h"
 #include "Model/OrderStatus.h"
 
 namespace View {
-
-namespace {
-
-int ReadInt() {
-    int value = 0;
-    if (!(std::cin >> value)) {
-        std::cin.clear();
-        value = 0;
-    }
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    return value;
-}
-
-}  // namespace
 
 void OrderApprovalView::ShowReservedOrders(const std::vector<Model::Order>& orders) const {
     std::cout << "----- 접수된 주문(RESERVED) -----\n";
@@ -34,14 +20,13 @@ void OrderApprovalView::ShowReservedOrders(const std::vector<Model::Order>& orde
 
 void OrderApprovalView::ShowNoReservedOrders() const { std::cout << "접수된(RESERVED) 주문이 없습니다.\n"; }
 
-int OrderApprovalView::PromptOrderSelection(int count) const {
-    std::cout << "처리할 주문 번호를 선택하세요(1-" << count << "): ";
-    return ReadInt();
+void OrderApprovalView::ShowNextToProcess(const Model::Order& order) const {
+    std::cout << "처리 대상(접수 순서상 가장 오래된 주문): " << order.GetOrderId() << "\n";
 }
 
 int OrderApprovalView::PromptApproveOrReject() const {
     std::cout << "1. 승인  2. 거절\n선택: ";
-    return ReadInt();
+    return Common::ReadInt();
 }
 
 void OrderApprovalView::ShowConfirmedImmediately(const std::string& orderId) const {

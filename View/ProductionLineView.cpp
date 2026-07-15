@@ -2,23 +2,10 @@
 
 #include <iomanip>
 #include <iostream>
-#include <limits>
+
+#include "Common/ConsoleInput.h"
 
 namespace View {
-
-namespace {
-
-int ReadInt() {
-    int value = 0;
-    if (!(std::cin >> value)) {
-        std::cin.clear();
-        value = 0;
-    }
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    return value;
-}
-
-}  // namespace
 
 void ProductionLineView::ShowMenu() const {
     std::cout << "\n----- 생산 라인 -----\n"
@@ -28,7 +15,7 @@ void ProductionLineView::ShowMenu() const {
               << "선택: ";
 }
 
-int ProductionLineView::PromptMenuChoice() const { return ReadInt(); }
+int ProductionLineView::PromptMenuChoice() const { return Common::ReadInt(); }
 
 void ProductionLineView::ShowCurrentJob(const std::optional<Model::ProductionJob>& currentJob,
                                          double progress) const {

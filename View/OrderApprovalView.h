@@ -16,10 +16,10 @@ public:
 
     virtual void ShowReservedOrders(const std::vector<Model::Order>& orders) const;
     virtual void ShowNoReservedOrders() const;
+    // Highlights which reserved order will actually be processed next (always
+    // the oldest — see OrderApprovalController for why selection isn't free).
+    virtual void ShowNextToProcess(const Model::Order& order) const;
 
-    // 1-based index into the list shown by ShowReservedOrders; returns an
-    // out-of-range value (e.g. 0) if the input doesn't parse as a number.
-    virtual int PromptOrderSelection(int count) const;
     // Returns 1 (approve), 2 (reject), or any other value for "invalid".
     virtual int PromptApproveOrReject() const;
 

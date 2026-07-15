@@ -44,12 +44,10 @@ void OrderApprovalController::HandleApproveOrReject() {
     }
     view_.ShowReservedOrders(reserved);
 
-    int selection = view_.PromptOrderSelection(static_cast<int>(reserved.size()));
-    if (selection < 1 || selection > static_cast<int>(reserved.size())) {
-        view_.ShowInvalidSelection();
-        return;
-    }
-    const Model::Order& selected = reserved[static_cast<std::size_t>(selection - 1)];
+    // Always the oldest reserved order — never let the user jump ahead of it,
+    // since approval must consume stock in receipt order (PRD 7.4).
+    const Model::Order& selected = reserved.front();
+    view_.ShowNextToProcess(selected);
 
     int decision = view_.PromptApproveOrReject();
     if (decision == 1) {

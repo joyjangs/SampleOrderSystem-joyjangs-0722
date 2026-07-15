@@ -9,8 +9,10 @@
 namespace Controller {
 
 // PRD 7.4 approval/rejection — a single action per menu visit (same
-// single-shot pattern as OrderController): show the RESERVED list, let the
-// user pick one order and a decision, then return to the main menu.
+// single-shot pattern as OrderController): show the RESERVED list for
+// context, but always act on the oldest (first-received) reserved order.
+// Approval must consume stock in receipt order (CLAUDE.md/PRD 7.4), so the
+// UI never lets the user pick an arbitrary order out of sequence.
 class OrderApprovalController : public ISubMenuController {
 public:
     OrderApprovalController(Model::OrderApprovalService& approvalService, Model::OrderRepository& orderRepository,

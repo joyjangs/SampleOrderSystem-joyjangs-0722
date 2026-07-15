@@ -33,19 +33,16 @@ double ProductionLine::PeekProgress(const std::string& nowIso8601) const {
 }
 
 std::optional<ProductionJob> ProductionLine::CompleteFrontJob() {
-    std::vector<ProductionJob> queue = repository_.FindAll();
-    if (queue.empty()) {
+    std::optional<ProductionJob> completed = Peek();
+    if (!completed.has_value()) {
         return std::nullopt;
     }
+    repository_.Remove(completed->GetOrderId());
 
-    ProductionJob completed = queue.front();
-    repository_.Remove(completed.GetOrderId());
-
-    std::vector<ProductionJob> remaining = repository_.FindAll();
-    if (!remaining.empty()) {
-        ProductionJob next = remaining.front();
-        next.SetStartedAt(Common::CurrentTimestampIso8601());
-        repository_.Update(next);
+    std::optional<ProductionJob> next = Peek();
+    if (next.has_value()) {
+        next->SetStartedAt(Common::CurrentTimestampIso8601());
+        repository_.Update(*next);
     }
 
     return completed;
