@@ -16,6 +16,8 @@ public:
     ProductionJob(std::string orderId, std::string sampleId, int shortage, int actualQuantity,
                   double estimatedTime, std::optional<std::string> startedAt = std::nullopt);
 
+    // GetId() is the Repository-facing key accessor (see JsonFileRepository);
+    // GetOrderId() is the domain-facing name for the same field.
     const std::string& GetId() const { return orderId_; }
     const std::string& GetOrderId() const { return orderId_; }
     const std::string& GetSampleId() const { return sampleId_; }

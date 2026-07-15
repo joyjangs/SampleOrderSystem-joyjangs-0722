@@ -15,6 +15,8 @@ public:
     Order(std::string orderId, std::string sampleId, std::string customerName, int quantity,
           OrderStatus status, std::string createdAt, std::string updatedAt);
 
+    // GetId() is the Repository-facing key accessor (see JsonFileRepository);
+    // GetOrderId() is the domain-facing name for the same field.
     const std::string& GetId() const { return orderId_; }
     const std::string& GetOrderId() const { return orderId_; }
     const std::string& GetSampleId() const { return sampleId_; }
