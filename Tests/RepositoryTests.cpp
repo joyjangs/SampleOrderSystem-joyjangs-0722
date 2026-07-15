@@ -5,13 +5,13 @@
 #include "Model/OrderRepository.h"
 #include "Model/ProductionJobRepository.h"
 #include "Model/SampleRepository.h"
+#include "Tests/TestSupport/TempFileFixture.h"
 
 namespace {
 
-class SampleRepositoryTest : public ::testing::Test {
+class SampleRepositoryTest : public Tests::TempFileFixture {
 protected:
-    std::string path = "data/test_samples.json";
-    void TearDown() override { std::filesystem::remove(path); }
+    SampleRepositoryTest() : TempFileFixture("data/test_samples.json") {}
 };
 
 TEST_F(SampleRepositoryTest, AddThenFindByIdReturnsIt) {
@@ -131,10 +131,9 @@ TEST_F(SampleRepositoryTest, PreservesInsertionOrderAcrossMultipleEntities) {
     EXPECT_EQ(all[2].GetId(), "S-003");
 }
 
-class OrderRepositoryTest : public ::testing::Test {
+class OrderRepositoryTest : public Tests::TempFileFixture {
 protected:
-    std::string path = "data/test_order_crud.json";
-    void TearDown() override { std::filesystem::remove(path); }
+    OrderRepositoryTest() : TempFileFixture("data/test_order_crud.json") {}
 };
 
 TEST_F(OrderRepositoryTest, AddThenFindByIdReturnsIt) {
@@ -216,10 +215,9 @@ TEST_F(OrderRepositoryTest, PreservesInsertionOrderAcrossMultipleEntitiesAfterRe
     EXPECT_EQ(all[2].GetOrderId(), "ORD-3");
 }
 
-class ProductionJobRepositoryTest : public ::testing::Test {
+class ProductionJobRepositoryTest : public Tests::TempFileFixture {
 protected:
-    std::string path = "data/test_production_job_crud.json";
-    void TearDown() override { std::filesystem::remove(path); }
+    ProductionJobRepositoryTest() : TempFileFixture("data/test_production_job_crud.json") {}
 };
 
 TEST_F(ProductionJobRepositoryTest, AddThenFindByIdReturnsIt) {

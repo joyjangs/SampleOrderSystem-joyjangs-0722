@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
-#include <filesystem>
 #include <iostream>
 #include <sstream>
 
 #include "Controller/SampleController.h"
 #include "Model/SampleRepository.h"
+#include "Tests/TestSupport/TempFileFixture.h"
 #include "View/SampleView.h"
 
 // Phase 1 §6.5: end-to-end tests wiring the real SampleRepository (backed by
@@ -39,10 +39,9 @@ private:
     std::streambuf* previousBuffer_;
 };
 
-class SampleManagementSystemTest : public ::testing::Test {
+class SampleManagementSystemTest : public Tests::TempFileFixture {
 protected:
-    std::string path = "data/test_system_samples.json";
-    void TearDown() override { std::filesystem::remove(path); }
+    SampleManagementSystemTest() : TempFileFixture("data/test_system_samples.json") {}
 };
 
 TEST_F(SampleManagementSystemTest, RegisterThenListThenSearchEndToEndThroughRealConsoleFlow) {
