@@ -4,7 +4,8 @@
 
 namespace Controller {
 
-MainMenuController::MainMenuController(View::MainMenuView& view) : view_(view) {}
+MainMenuController::MainMenuController(View::MainMenuView& view, Controller::SampleController& sampleController)
+    : view_(view), sampleController_(sampleController) {}
 
 void MainMenuController::Run() {
     while (!isExitRequested_) {
@@ -23,7 +24,11 @@ void MainMenuController::HandleInput(const std::string& input) {
         view_.ShowExitMessage();
         return;
     }
-    if (input == "1" || input == "2" || input == "3" || input == "4" || input == "5" || input == "6") {
+    if (input == "1") {
+        sampleController_.Run();
+        return;
+    }
+    if (input == "2" || input == "3" || input == "4" || input == "5" || input == "6") {
         view_.ShowNotImplemented();
         return;
     }

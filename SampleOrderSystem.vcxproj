@@ -157,7 +157,9 @@
     <ClCompile Include="Model\OrderRepository.cpp" />
     <ClCompile Include="Model\ProductionJobRepository.cpp" />
     <ClCompile Include="View\MainMenuView.cpp" />
+    <ClCompile Include="View\SampleView.cpp" />
     <ClCompile Include="Controller\MainMenuController.cpp" />
+    <ClCompile Include="Controller\SampleController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\Json.h" />
@@ -171,7 +173,9 @@
     <ClInclude Include="Model\OrderRepository.h" />
     <ClInclude Include="Model\ProductionJobRepository.h" />
     <ClInclude Include="View\MainMenuView.h" />
+    <ClInclude Include="View\SampleView.h" />
     <ClInclude Include="Controller\MainMenuController.h" />
+    <ClInclude Include="Controller\SampleController.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

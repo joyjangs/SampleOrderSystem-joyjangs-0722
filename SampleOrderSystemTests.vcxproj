@@ -160,7 +160,9 @@
     <ClCompile Include="Model\OrderRepository.cpp" />
     <ClCompile Include="Model\ProductionJobRepository.cpp" />
     <ClCompile Include="View\MainMenuView.cpp" />
+    <ClCompile Include="View\SampleView.cpp" />
     <ClCompile Include="Controller\MainMenuController.cpp" />
+    <ClCompile Include="Controller\SampleController.cpp" />
     <ClCompile Include="Tests\ModelSerializationTests.cpp" />
     <ClCompile Include="Tests\RepositoryTests.cpp" />
     <ClCompile Include="Tests\ControllerTests.cpp" />

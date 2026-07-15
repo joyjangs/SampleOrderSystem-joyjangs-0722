@@ -3,10 +3,12 @@
 #endif
 
 #include "Controller/MainMenuController.h"
+#include "Controller/SampleController.h"
 #include "Model/OrderRepository.h"
 #include "Model/ProductionJobRepository.h"
 #include "Model/SampleRepository.h"
 #include "View/MainMenuView.h"
+#include "View/SampleView.h"
 
 int main() {
 #ifdef _WIN32
@@ -22,8 +24,11 @@ int main() {
     orderRepository.Load();
     productionJobRepository.Load();
 
+    View::SampleView sampleView;
+    Controller::SampleController sampleController(sampleRepository, sampleView);
+
     View::MainMenuView mainMenuView;
-    Controller::MainMenuController mainMenuController(mainMenuView);
+    Controller::MainMenuController mainMenuController(mainMenuView, sampleController);
     mainMenuController.Run();
 
     return 0;

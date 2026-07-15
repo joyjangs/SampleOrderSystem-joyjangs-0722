@@ -22,7 +22,9 @@
     <ClCompile Include="Model\OrderRepository.cpp" Filter="Production Sources" />
     <ClCompile Include="Model\ProductionJobRepository.cpp" Filter="Production Sources" />
     <ClCompile Include="View\MainMenuView.cpp" Filter="Production Sources" />
+    <ClCompile Include="View\SampleView.cpp" Filter="Production Sources" />
     <ClCompile Include="Controller\MainMenuController.cpp" Filter="Production Sources" />
+    <ClCompile Include="Controller\SampleController.cpp" Filter="Production Sources" />
     <ClCompile Include="Tests\ModelSerializationTests.cpp" Filter="Tests" />
     <ClCompile Include="Tests\RepositoryTests.cpp" Filter="Tests" />
     <ClCompile Include="Tests\ControllerTests.cpp" Filter="Tests" />

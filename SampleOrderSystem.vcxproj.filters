@@ -37,7 +37,9 @@
     <ClCompile Include="Model\OrderRepository.cpp" Filter="Model Files" />
     <ClCompile Include="Model\ProductionJobRepository.cpp" Filter="Model Files" />
     <ClCompile Include="View\MainMenuView.cpp" Filter="View Files" />
+    <ClCompile Include="View\SampleView.cpp" Filter="View Files" />
     <ClCompile Include="Controller\MainMenuController.cpp" Filter="Controller Files" />
+    <ClCompile Include="Controller\SampleController.cpp" Filter="Controller Files" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\Json.h" Filter="Common Files" />
@@ -51,6 +53,8 @@
     <ClInclude Include="Model\OrderRepository.h" Filter="Model Files" />
     <ClInclude Include="Model\ProductionJobRepository.h" Filter="Model Files" />
     <ClInclude Include="View\MainMenuView.h" Filter="View Files" />
+    <ClInclude Include="View\SampleView.h" Filter="View Files" />
     <ClInclude Include="Controller\MainMenuController.h" Filter="Controller Files" />
+    <ClInclude Include="Controller\SampleController.h" Filter="Controller Files" />
   </ItemGroup>
 </Project>

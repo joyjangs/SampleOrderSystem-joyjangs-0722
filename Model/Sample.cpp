@@ -1,6 +1,21 @@
 #include "Model/Sample.h"
 
+#include <cctype>
+
 namespace Model {
+
+namespace {
+
+bool IsBlank(const std::string& text) {
+    for (char c : text) {
+        if (!std::isspace(static_cast<unsigned char>(c))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+}  // namespace
 
 Sample::Sample(std::string id, std::string name, double avgProductionTime, double yieldRate, int stock)
     : id_(std::move(id)),
@@ -23,6 +38,23 @@ Sample Sample::FromJson(const Common::JsonValue& json) {
     return Sample(json.At("id").AsString(), json.At("name").AsString(),
                   json.At("avgProductionTime").AsDouble(), json.At("yieldRate").AsDouble(),
                   json.At("stock").AsInt());
+}
+
+bool Sample::IsValidYieldRate(double yieldRate) { return yieldRate > 0.0 && yieldRate <= 1.0; }
+
+bool Sample::IsValidAvgProductionTime(double avgProductionTime) { return avgProductionTime > 0.0; }
+
+bool Sample::IsValidId(const std::string& id) { return !IsBlank(id); }
+
+bool Sample::IsValidName(const std::string& name) { return !IsBlank(name); }
+
+std::optional<Sample> Sample::TryCreate(std::string id, std::string name, double avgProductionTime,
+                                        double yieldRate, int stock) {
+    if (!IsValidId(id) || !IsValidName(name) || !IsValidAvgProductionTime(avgProductionTime) ||
+        !IsValidYieldRate(yieldRate)) {
+        return std::nullopt;
+    }
+    return Sample(std::move(id), std::move(name), avgProductionTime, yieldRate, stock);
 }
 
 }  // namespace Model

@@ -2,15 +2,16 @@
 
 #include <string>
 
+#include "Controller/SampleController.h"
 #include "View/MainMenuView.h"
 
 namespace Controller {
 
-// Phase 0 scope: the exit path ("0") is fully functional; every other menu
-// item just reports "not implemented" until its owning Phase fills it in.
+// "1" (시료 관리) delegates to SampleController; "2"~"6" still report "not
+// implemented" until their owning Phase fills them in.
 class MainMenuController {
 public:
-    explicit MainMenuController(View::MainMenuView& view);
+    MainMenuController(View::MainMenuView& view, Controller::SampleController& sampleController);
 
     void Run();
     void HandleInput(const std::string& input);
@@ -18,6 +19,7 @@ public:
 
 private:
     View::MainMenuView& view_;
+    Controller::SampleController& sampleController_;
     bool isExitRequested_ = false;
 };
 
