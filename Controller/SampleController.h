@@ -6,6 +6,14 @@
 
 namespace Controller {
 
+// The digit the user types at View::SampleView::ReadMenuChoice().
+enum class SampleMenuOption {
+    Exit = 0,
+    Register = 1,
+    ListAll = 2,
+    Search = 3,
+};
+
 // Sample management submenu: register / list / search. Delegates all
 // domain validation to Model::Sample and all I/O to View::SampleView.
 class SampleController : public ISubMenuController {

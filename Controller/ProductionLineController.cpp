@@ -18,14 +18,14 @@ void ProductionLineController::Run() {
     while (true) {
         ShowStatus();
         view_.ShowMenu();
-        int choice = view_.PromptMenuChoice();
-        if (choice == 0) {
+        auto option = static_cast<ProductionLineMenuOption>(view_.PromptMenuChoice());
+        if (option == ProductionLineMenuOption::Exit) {
             return;
         }
-        if (choice == 1) {
+        if (option == ProductionLineMenuOption::Refresh) {
             continue;  // "새로고침": loop back to ShowStatus with a fresh "now".
         }
-        if (choice == 2) {
+        if (option == ProductionLineMenuOption::CompleteJob) {
             HandleCompleteCurrentJob();
             continue;
         }

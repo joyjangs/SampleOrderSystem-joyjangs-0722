@@ -8,6 +8,12 @@
 
 namespace Controller {
 
+// The digit the user types at View::OrderApprovalView::PromptApproveOrReject().
+enum class ApprovalDecision {
+    Approve = 1,
+    Reject = 2,
+};
+
 // PRD 7.4 approval/rejection — a single action per menu visit (same
 // single-shot pattern as OrderController): show the RESERVED list for
 // context, but always act on the oldest (first-received) reserved order.

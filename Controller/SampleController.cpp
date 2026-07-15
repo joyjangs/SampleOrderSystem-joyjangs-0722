@@ -11,14 +11,14 @@ SampleController::SampleController(Model::SampleRepository& repository, View::Sa
 void SampleController::Run() {
     while (true) {
         view_.ShowMenu();
-        int choice = view_.ReadMenuChoice();
-        if (choice == 0) {
+        auto choice = static_cast<SampleMenuOption>(view_.ReadMenuChoice());
+        if (choice == SampleMenuOption::Exit) {
             return;
         }
         switch (choice) {
-            case 1: HandleRegister(); break;
-            case 2: HandleListAll(); break;
-            case 3: HandleSearchByName(); break;
+            case SampleMenuOption::Register: HandleRegister(); break;
+            case SampleMenuOption::ListAll: HandleListAll(); break;
+            case SampleMenuOption::Search: HandleSearchByName(); break;
             default: view_.ShowError("잘못된 선택입니다."); break;
         }
     }
