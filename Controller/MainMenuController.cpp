@@ -17,11 +17,13 @@ constexpr MainMenuOption kAllMenuOptions[] = {
 std::string ToMenuOptionKey(MainMenuOption option) { return std::to_string(static_cast<int>(option)); }
 
 MainMenuController::MainMenuController(
-    View::MainMenuView& view, std::map<std::string, std::reference_wrapper<ISubMenuController>> subMenuControllers)
-    : view_(view), subMenuControllers_(std::move(subMenuControllers)) {}
+    View::MainMenuView& view, Model::MonitoringService& monitoringService,
+    std::map<std::string, std::reference_wrapper<ISubMenuController>> subMenuControllers)
+    : view_(view), monitoringService_(monitoringService), subMenuControllers_(std::move(subMenuControllers)) {}
 
 void MainMenuController::Run() {
     while (!isExitRequested_) {
+        view_.PrintSummary(monitoringService_.GetMainMenuSummary());
         view_.ShowMainMenu();
         std::string input;
         if (!std::getline(std::cin, input)) {
