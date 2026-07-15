@@ -276,8 +276,13 @@ public:
       (외부 라이브러리 없이 `Common::JsonValue` 자체 구현으로 확정 — 2.3절 참고)
 - [x] `SampleRepository`/`OrderRepository`/`ProductionJobRepository`가 CRUD를 지원하고,
       JSON 파일로 저장/로드됨
-- [x] `SampleOrderSystemTests` 테스트 프로젝트가 `.slnx`에 추가되어 `packages/gmock.1.11.0`을
-      재사용해 빌드됨
+- [x] GoogleTest/GMock 테스트가 `packages/gmock.1.11.0`을 재사용해 빌드됨. **(변경, Phase 1
+      진행 중 확정)** 별도 `SampleOrderSystemTests` 프로젝트가 아니라, 배포 대상이 아닌
+      프로젝트임을 감안해 `SampleOrderSystem.vcxproj` 하나로 통합했다: `Tests/*.cpp`와
+      gmock.targets import는 `Condition="'$(Configuration)'=='Debug'"`로만 컴파일/링크되고,
+      `main.cpp`가 `_DEBUG`에서만 `--test` 인자를 받아 `RUN_ALL_TESTS()`로 분기한다
+      (`SampleOrderSystem.exe --test`). Release 빌드는 테스트 소스도, gtest/gmock도 전혀
+      포함하지 않는다.
 - [x] `main.cpp`가 빌드되어 콘솔에서 실행되며 최소 메인 메뉴가 출력되고 정상 종료됨
       (Repository는 생성/`Load()`까지만 수행하고 Controller에는 아직 주입하지 않음 — 2.5절
       "범위 축소" 참고, Phase 1에서 배선)
