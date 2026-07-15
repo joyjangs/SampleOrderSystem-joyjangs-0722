@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{18ecea37-26af-40e7-928b-5ee047d03326}</ProjectGuid>
-    <RootNamespace>SampleOrderSystem</RootNamespace>
+    <ProjectGuid>{7F2E9C10-4B3A-4D5E-8F61-2A9C0E7B5D3A}</ProjectGuid>
+    <RootNamespace>SampleOrderSystemTests</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -147,7 +147,10 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Production sources under test (compiled directly; no shared static lib in this small project). -->
     <ClCompile Include="Common\Json.cpp" />
     <ClCompile Include="Model\OrderStatus.cpp" />
     <ClCompile Include="Model\Sample.cpp" />
@@ -158,22 +161,19 @@
     <ClCompile Include="Model\ProductionJobRepository.cpp" />
     <ClCompile Include="View\MainMenuView.cpp" />
     <ClCompile Include="Controller\MainMenuController.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Common\Json.h" />
-    <ClInclude Include="Model\OrderStatus.h" />
-    <ClInclude Include="Model\Sample.h" />
-    <ClInclude Include="Model\Order.h" />
-    <ClInclude Include="Model\ProductionJob.h" />
-    <ClInclude Include="Model\Repository.h" />
-    <ClInclude Include="Model\JsonFileRepository.h" />
-    <ClInclude Include="Model\SampleRepository.h" />
-    <ClInclude Include="Model\OrderRepository.h" />
-    <ClInclude Include="Model\ProductionJobRepository.h" />
-    <ClInclude Include="View\MainMenuView.h" />
-    <ClInclude Include="Controller\MainMenuController.h" />
+    <ClCompile Include="Tests\ModelSerializationTests.cpp" />
+    <ClCompile Include="Tests\RepositoryTests.cpp" />
+    <ClCompile Include="Tests\ControllerTests.cpp" />
+    <ClCompile Include="packages\gmock.1.11.0\lib\native\src\gmock\src\gmock_main.cc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\gmock.1.11.0\build\native\gmock.targets" Condition="Exists('packages\gmock.1.11.0\build\native\gmock.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>이 프로젝트는 이 컴퓨터에 없는 NuGet 패키지를 참조합니다. 해당 패키지를 다운로드하려면 NuGet 패키지 복원을 사용하십시오. 자세한 내용은 http://go.microsoft.com/fwlink/?LinkID=322105를 참조하십시오. 누락된 파일은 {0}입니다.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\gmock.1.11.0\build\native\gmock.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\gmock.1.11.0\build\native\gmock.targets'))" />
+  </Target>
 </Project>

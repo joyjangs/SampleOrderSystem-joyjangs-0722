@@ -1,0 +1,86 @@
+#include <gtest/gtest.h>
+
+#include "Common/Json.h"
+#include "Model/Order.h"
+#include "Model/OrderStatus.h"
+#include "Model/ProductionJob.h"
+#include "Model/Sample.h"
+
+TEST(JsonValueTest, RoundTripsObjectFields) {
+    Common::JsonValue value = Common::JsonValue::MakeObject();
+    value["name"] = std::string("SampleA");
+    value["stock"] = 50;
+    value["yieldRate"] = 0.9;
+
+    Common::JsonValue parsed = Common::JsonValue::Parse(value.Dump());
+
+    EXPECT_EQ(parsed.At("name").AsString(), "SampleA");
+    EXPECT_EQ(parsed.At("stock").AsInt(), 50);
+    EXPECT_DOUBLE_EQ(parsed.At("yieldRate").AsDouble(), 0.9);
+}
+
+TEST(JsonValueTest, RoundTripsNullAndArray) {
+    Common::JsonValue array = Common::JsonValue::MakeArray();
+    array.PushBack(Common::JsonValue(nullptr));
+    array.PushBack(Common::JsonValue(std::string("x")));
+
+    Common::JsonValue parsed = Common::JsonValue::Parse(array.Dump());
+
+    ASSERT_EQ(parsed.AsArray().size(), 2u);
+    EXPECT_TRUE(parsed.AsArray()[0].IsNull());
+    EXPECT_EQ(parsed.AsArray()[1].AsString(), "x");
+}
+
+TEST(SampleTest, ToJsonFromJsonRoundTrips) {
+    Model::Sample sample("S-001", "SampleA", 10.0, 0.9, 50);
+
+    Model::Sample restored = Model::Sample::FromJson(sample.ToJson());
+
+    EXPECT_EQ(restored.GetId(), "S-001");
+    EXPECT_EQ(restored.GetName(), "SampleA");
+    EXPECT_DOUBLE_EQ(restored.GetAvgProductionTime(), 10.0);
+    EXPECT_DOUBLE_EQ(restored.GetYieldRate(), 0.9);
+    EXPECT_EQ(restored.GetStock(), 50);
+}
+
+TEST(OrderTest, AllStatusValuesRoundTripThroughJsonString) {
+    const Model::OrderStatus statuses[] = {Model::OrderStatus::Reserved, Model::OrderStatus::Rejected,
+                                            Model::OrderStatus::Producing, Model::OrderStatus::Confirmed,
+                                            Model::OrderStatus::Release};
+    for (Model::OrderStatus status : statuses) {
+        Model::Order order("ORD-20260416-0043", "S-001", "Acme", 50, status, "2026-04-16T10:00:00",
+                            "2026-04-16T10:00:00");
+
+        Model::Order restored = Model::Order::FromJson(order.ToJson());
+
+        EXPECT_EQ(restored.GetStatus(), status);
+        EXPECT_EQ(restored.GetOrderId(), "ORD-20260416-0043");
+        EXPECT_EQ(restored.GetSampleId(), "S-001");
+        EXPECT_EQ(restored.GetCustomerName(), "Acme");
+        EXPECT_EQ(restored.GetQuantity(), 50);
+    }
+}
+
+TEST(OrderTest, UnknownStatusStringThrows) {
+    EXPECT_THROW(Model::OrderStatusFromString("UNKNOWN"), std::invalid_argument);
+}
+
+TEST(ProductionJobTest, StartedAtRoundTripsAsNullWhenQueued) {
+    Model::ProductionJob queued("ORD-1", "S-001", 50, 100, 1000.0);
+
+    Model::ProductionJob restored = Model::ProductionJob::FromJson(queued.ToJson());
+
+    EXPECT_FALSE(restored.GetStartedAt().has_value());
+    EXPECT_EQ(restored.GetShortage(), 50);
+    EXPECT_EQ(restored.GetActualQuantity(), 100);
+    EXPECT_DOUBLE_EQ(restored.GetEstimatedTime(), 1000.0);
+}
+
+TEST(ProductionJobTest, StartedAtRoundTripsAsValueWhenStarted) {
+    Model::ProductionJob started("ORD-2", "S-001", 50, 100, 1000.0, std::string("2026-04-16T10:00:00"));
+
+    Model::ProductionJob restored = Model::ProductionJob::FromJson(started.ToJson());
+
+    ASSERT_TRUE(restored.GetStartedAt().has_value());
+    EXPECT_EQ(*restored.GetStartedAt(), "2026-04-16T10:00:00");
+}
