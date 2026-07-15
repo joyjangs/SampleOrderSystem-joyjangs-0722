@@ -54,32 +54,32 @@ Phase(2~7)에서 어떻게 소비되는지는 알아야 하지만(재고 필드,
       순수 데이터 컨테이너이며, `GetId/GetName/GetAvgProductionTime/GetYieldRate/GetStock`
       getter와 `SetName/SetAvgProductionTime/SetYieldRate/SetStock` setter, `ToJson()`/
       `static FromJson()`만 존재한다. Phase 1은 이 클래스에 검증 로직을 실제로 추가한다.
-- [ ] `Sample`에 정적 검증 함수를 추가한다(기존 getter/setter는 그대로 유지):
-  - [ ] `static bool IsValidYieldRate(double yieldRate)`: `0.0 < yieldRate <= 1.0`만 허용.
-  - [ ] `static bool IsValidAvgProductionTime(double time)`: `time > 0`만 허용.
-  - [ ] `static bool IsValidId(const std::string& id)` / `static bool IsValidName(const std::string& name)`:
+- [x] `Sample`에 정적 검증 함수를 추가한다(기존 getter/setter는 그대로 유지):
+  - [x] `static bool IsValidYieldRate(double yieldRate)`: `0.0 < yieldRate <= 1.0`만 허용.
+  - [x] `static bool IsValidAvgProductionTime(double time)`: `time > 0`만 허용.
+  - [x] `static bool IsValidId(const std::string& id)` / `static bool IsValidName(const std::string& name)`:
         trim 후 비어있지 않아야 함.
-- [ ] 생성자 대신 검증을 통과한 경우에만 `Sample`을 만들 수 있는 정적 팩토리를 추가한다:
+- [x] 생성자 대신 검증을 통과한 경우에만 `Sample`을 만들 수 있는 정적 팩토리를 추가한다:
       `static std::optional<Sample> TryCreate(std::string id, std::string name,
       double avgProductionTime, double yieldRate, int stock = 0)`. 기존 생성자는 그대로 두되
       (Repository의 `FromJson` 등 내부 용도로 계속 사용), 신규 등록 경로(Controller)는 반드시
       `TryCreate`를 거치도록 한다. 실패 시 `std::nullopt`을 반환하며 예외를 던지지 않는다
       (Phase 0에 도메인 검증 예외 관례가 없고, `FindById`가 이미 `std::optional`을 쓰는
       스타일과 일관되게 `std::optional` 기반으로 Phase 1이 관례를 확정한다).
-  - [ ] `stock`은 등록 시 항상 0으로 고정한다. 등록 화면에서 초기 재고를 입력받지 않고
+  - [x] `stock`은 등록 시 항상 0으로 고정한다. 등록 화면에서 초기 재고를 입력받지 않고
         `TryCreate`도 `stock` 파라미터를 기본값 0으로만 받는다(생산 완료 시점에만 증가시킨다는
         CLAUDE.md 원칙과 정합). PRD 7.2가 등록 입력 항목에 재고를 명시하지 않는 점과도 일치.
 - [x] (확인 완료, 더 이상 TODO 아님) 시료 ID 채번 규칙: **사용자가 직접 ID를 입력**하고
       Model/Controller는 중복 여부만 검증한다(자동 채번 없음). docs/Phase6.md(더미 데이터
       생성기) 조정 과정에서 이미 확정되어 반영된 사실이다.
-- [ ] `Model/SampleRepository.h`/`.cpp`에 `SearchByName` 메서드를 새로 추가한다(현재는 존재하지
+- [x] `Model/SampleRepository.h`/`.cpp`에 `SearchByName` 메서드를 새로 추가한다(현재는 존재하지
       않음). `IRepository` 공통 인터페이스에는 없는 `Sample` 전용 메서드이므로 `SampleRepository`
       에만 선언한다: `virtual std::vector<Sample> SearchByName(const std::string& keyword) const`.
       부분 일치 여부/대소문자 무시 여부는 "TODO: 확인 필요" — 기본안은 대소문자 무시 부분
       문자열 포함 검색. **`virtual`로 선언**해 6.3의 GMock 테스트에서 `SampleRepository`를
       상속한 목 클래스가 `Add`/`FindById`(이미 `IRepository`에서 가상)와 함께 `SearchByName`도
       오버라이드할 수 있게 한다(그렇지 않으면 GMock으로 이 메서드를 목킹할 수 없다).
-- [ ] `Model/Repository.h`의 `IRepository<TEntity, TId>::Add`/`Update`는 `void`이며 `Add`는
+- [x] `Model/Repository.h`의 `IRepository<TEntity, TId>::Add`/`Update`는 `void`이며 `Add`는
       중복 `id`를 거부하지 않는다(그냥 `push_back`). 이 공용 템플릿은 Order/ProductionJob도
       상속하므로 Phase 1이 임의로 시그니처를 바꾸지 않는다. 대신 "동일 id로 재등록 시 실패"
       요구사항은 **Controller가 `Add` 호출 전에 `FindById`로 중복을 먼저 확인**하는 방식으로
@@ -87,31 +87,33 @@ Phase(2~7)에서 어떻게 소비되는지는 알아야 하지만(재고 필드,
 
 ### 2.2 Controller 계층
 
-- [ ] `Controller/SampleController.h`/`.cpp` 신설.
-  - [ ] 생성자 `SampleController(Model::SampleRepository& repository, View::SampleView& view)`
+- [x] `Controller/SampleController.h`/`.cpp` 신설.
+  - [x] 생성자 `SampleController(Model::SampleRepository& repository, View::SampleView& view)`
         — 생성자 주입, DI로 테스트 용이성 확보.
-  - [ ] `void Run()`: 시료 관리 하위 메뉴 루프 진입점. `MainMenuController`가 이 메서드를
+  - [x] `void Run()`: 시료 관리 하위 메뉴 루프 진입점. `MainMenuController`가 이 메서드를
         호출해 하위 메뉴로 위임한다.
-  - [ ] `void HandleRegister()`: View로부터 입력을 받아 **`Sample::TryCreate(...)`를 호출하기
+  - [x] `void HandleRegister()`: View로부터 입력을 받아 **`Sample::TryCreate(...)`를 호출하기
         전에 먼저 `repository_.FindById(id)`로 중복 여부를 확인**한다. 이미 존재하면
         Repository의 `Add`를 호출하지 않고 실패 결과를 View에 전달한다(`IRepository::Add`
         자체는 중복을 거부하지 않으므로 Controller가 이 책임을 진다). 중복이 아니면
         `TryCreate`로 검증하고, 성공 시 `repository_.Add(*sample)` 호출 후 결과를 View에
         전달, 실패(`std::nullopt`) 시 검증 실패 메시지를 View에 전달한다.
-  - [ ] `void HandleListAll()`: `repository_.FindAll()` 결과를 그대로 View의
+  - [x] `void HandleListAll()`: `repository_.FindAll()` 결과를 그대로 View의
         `ShowSampleList(...)`에 위임해 출력.
-  - [ ] `void HandleSearchByName()`: View로부터 검색어를 입력받아 `repository_.SearchByName(...)`
+  - [x] `void HandleSearchByName()`: View로부터 검색어를 입력받아 `repository_.SearchByName(...)`
         호출 후 결과를 View의 `ShowSearchResult(...)`에 위임해 출력(0건 포함).
-  - [ ] Controller는 입력 파싱/흐름 제어만 하고, 수율/생산시간 유효성 판단 로직 자체는 갖지
+  - [x] Controller는 입력 파싱/흐름 제어만 하고, 수율/생산시간 유효성 판단 로직 자체는 갖지
         않는다(Model에 위임) — CLAUDE.md 아키텍처 원칙 준수.
-- [ ] `Controller/MainMenuController.h`/`.cpp`를 수정해 "1"(시료 관리) 입력을
+- [x] `Controller/MainMenuController.h`/`.cpp`를 수정해 "1"(시료 관리) 입력을
       `SampleController`로 위임하도록 배선한다:
-  - [ ] 생성자를 `MainMenuController(View::MainMenuView& view, Controller::SampleController& sampleController)`
-        로 변경하고, `sampleController_` 참조 멤버를 추가한다.
-  - [ ] `HandleInput`에서 `input == "1"`일 때 기존 `view_.ShowNotImplemented()` 대신
+  - [x] 생성자를 `MainMenuController(View::MainMenuView& view, Controller::ISubMenuController& sampleController)`
+        로 변경하고, `sampleController_` 참조 멤버를 추가한다. (실제 구현은 code-review에서 DIP를
+        지적받아 `SampleController` 구체 타입이 아니라 `Controller::ISubMenuController` 인터페이스를
+        받도록 한 단계 더 강화됐다 — `SampleController`가 이 인터페이스를 구현한다.)
+  - [x] `HandleInput`에서 `input == "1"`일 때 기존 `view_.ShowNotImplemented()` 대신
         `sampleController_.Run()`을 호출하도록 분기를 분리한다. "2"~"6"은 여전히
         `ShowNotImplemented()`를 유지한다.
-  - [ ] `main.cpp`에서 `Model::SampleRepository sampleRepository`를 `View::SampleView`,
+  - [x] `main.cpp`에서 `Model::SampleRepository sampleRepository`를 `View::SampleView`,
         `Controller::SampleController`에 순서대로 주입하고, 그 `SampleController`를 다시
         `MainMenuController`에 주입하도록 배선을 갱신한다(현재 `main.cpp`는 Repository를 만들고
         `Load()`만 호출할 뿐 어떤 Controller에도 주입하지 않는 상태 — 이 배선이 비어있다는
@@ -120,18 +122,18 @@ Phase(2~7)에서 어떻게 소비되는지는 알아야 하지만(재고 필드,
 
 ### 2.3 View 계층
 
-- [ ] `View/SampleView.h`/`.cpp` 신설. 콘솔 입출력만 담당하고 도메인 판단은 하지 않는다.
-  - [ ] `void ShowMenu()`: 시료 관리 하위 메뉴(등록/조회/검색/뒤로가기) 출력.
-  - [ ] 시료 등록 입력: `SampleRegistrationInput ReadRegistrationInput()`(가칭 DTO 또는 개별
+- [x] `View/SampleView.h`/`.cpp` 신설. 콘솔 입출력만 담당하고 도메인 판단은 하지 않는다.
+  - [x] `void ShowMenu()`: 시료 관리 하위 메뉴(등록/조회/검색/뒤로가기) 출력.
+  - [x] 시료 등록 입력: `SampleRegistrationInput ReadRegistrationInput()`(가칭 DTO 또는 개별
         getter 조합) — id, name, avgProductionTime, yieldRate를 순서대로 입력받는다. 입력
         형식 오류(숫자 파싱 실패 등)는 View에서 재입력을 유도하되, "값의 의미적 유효성"
         (수율 범위 등)은 Model 검증 결과를 받아 View가 에러 메시지만 출력한다.
-  - [ ] `void ShowRegistrationResult(bool success, const std::string& message)`.
-  - [ ] `void ShowSampleList(const std::vector<Sample>& samples)`: 표 형태로 ID/이름/평균
+  - [x] `void ShowRegistrationResult(bool success, const std::string& message)`.
+  - [x] `void ShowSampleList(const std::vector<Sample>& samples)`: 표 형태로 ID/이름/평균
         생산시간/수율/재고 출력 (PRD 10장 UI 참고: "ID / 시료명 / 평균 생산시간 / 수율 /
         현재 재고"). 목록이 비어 있으면 "등록된 시료가 없습니다" 안내.
-  - [ ] `std::string ReadSearchKeyword()`.
-  - [ ] `void ShowSearchResult(const std::vector<Sample>& results, const std::string& keyword)`:
+  - [x] `std::string ReadSearchKeyword()`.
+  - [x] `void ShowSearchResult(const std::vector<Sample>& results, const std::string& keyword)`:
         결과 목록 출력, 0건이면 "일치하는 시료가 없습니다" 안내.
 
 ## 3. 인터페이스/데이터 스키마
@@ -240,16 +242,26 @@ private:
     View::SampleView& view_;
 };
 
-// 기존 MainMenuController 변경 — 생성자에 SampleController& 추가, "1" 분기를 위임으로 변경
+// 기존 MainMenuController 변경 — 생성자에 ISubMenuController& 추가, "1" 분기를 위임으로 변경.
+// (실제 구현은 code-review에서 DIP를 지적받아, SampleController 구체 클래스가 아니라
+// Controller::ISubMenuController 인터페이스에 의존하도록 한 단계 더 강화됐다.)
+class ISubMenuController {
+public:
+    virtual ~ISubMenuController() = default;
+    virtual void Run() = 0;
+};
+
+class SampleController : public ISubMenuController { /* ... 위 3.4절 상단과 동일 ... */ };
+
 class MainMenuController {
 public:
-    MainMenuController(View::MainMenuView& view, Controller::SampleController& sampleController);
+    MainMenuController(View::MainMenuView& view, Controller::ISubMenuController& sampleController);
     void Run();
     void HandleInput(const std::string& input);
     bool IsExitRequested() const;
 private:
     View::MainMenuView& view_;
-    Controller::SampleController& sampleController_;
+    Controller::ISubMenuController& sampleController_;
     bool isExitRequested_ = false;
 };
 }
@@ -382,18 +394,20 @@ Phase가 깨지지 않도록 다음을 주의한다.
 
 ## 7. 완료 조건 (Definition of Done)
 
-- [ ] `Model::Sample`에 `TryCreate`/`IsValidYieldRate`/`IsValidAvgProductionTime`/`IsValidId`/
+- [x] `Model::Sample`에 `TryCreate`/`IsValidYieldRate`/`IsValidAvgProductionTime`/`IsValidId`/
       `IsValidName` 검증 로직(수율 `0 < y <= 1`, 생산시간 `> 0`, id/name 비어있지 않음)이
       구현되고 단위 테스트로 검증됨.
-- [ ] `Model::SampleRepository`에 `SearchByName`이 추가되고, 등록/전체조회/이름검색이 실제
+- [x] `Model::SampleRepository`에 `SearchByName`이 추가되고, 등록/전체조회/이름검색이 실제
       JSON 파일(`data/samples.json`) 기반으로 동작하며, 재시작 후에도 데이터가 유지됨.
       `Add`의 중복 id 거부는 Repository가 아닌 `SampleController::HandleRegister`가 담당함.
-- [ ] `Controller/SampleController`, `View/SampleView`가 MVC 계층 분리를 지키며 구현되고,
+- [x] `Controller/SampleController`, `View/SampleView`가 MVC 계층 분리를 지키며 구현되고,
       `Controller::MainMenuController`/`main.cpp` 배선이 갱신되어 메인 메뉴에서 "1"(시료 관리)
-      진입 → 등록/조회/검색이 콘솔에서 실제로 동작함.
-- [ ] `code-review` 에이전트 통과: Clean Code, 함수 라인 수, SOLID, 디자인 패턴 사용의 적절성
+      진입 → 등록/조회/검색이 콘솔에서 실제로 동작함. (`MainMenuController`는 `SampleController`
+      구체 타입이 아니라 `Controller::ISubMenuController` 인터페이스에 의존하도록 DIP를 한 단계
+      더 강화해 구현됨 — code-review 반영 사항.)
+- [x] `code-review` 에이전트 통과: Clean Code, 함수 라인 수, SOLID, 디자인 패턴 사용의 적절성
       기준 충족.
-- [ ] `tester` 에이전트 통과: 6장에 명시한 단위/통합 테스트가 모두 작성되어 빌드 및 실행에
-      성공(GREEN).
-- [ ] `supervisor` 에이전트가 본 문서 및 PRD 7.2/CLAUDE.md 대비 구현 결과를 검증해 불일치가
+- [x] `tester` 에이전트 통과: 6장에 명시한 단위/통합 테스트가 모두 작성되어 빌드 및 실행에
+      성공(GREEN, 63/63).
+- [x] `supervisor` 에이전트가 본 문서 및 PRD 7.2/CLAUDE.md 대비 구현 결과를 검증해 불일치가
       없음을 확인.
