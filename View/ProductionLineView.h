@@ -23,7 +23,6 @@ public:
     virtual void ShowCurrentJob(const std::optional<Model::ProductionJob>& currentJob, double progress) const;
     virtual void ShowQueue(const std::vector<Model::ProductionJob>& queue) const;
 
-    virtual void ShowNoJobToComplete() const;
     virtual void ShowJobCompleted(const std::string& orderId, int actualQuantity) const;
     virtual void ShowInvalidSelection() const;
 };

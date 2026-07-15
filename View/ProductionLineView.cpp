@@ -10,7 +10,6 @@ namespace View {
 void ProductionLineView::ShowMenu() const {
     std::cout << "\n----- 생산 라인 -----\n"
               << "1. 새로고침\n"
-              << "2. 생산 완료 처리\n"
               << "0. 뒤로 가기\n"
               << "선택: ";
 }
@@ -37,8 +36,6 @@ void ProductionLineView::ShowQueue(const std::vector<Model::ProductionJob>& queu
                   << (job.GetStartedAt().has_value() ? " [진행 중]" : " [대기 중]") << "\n";
     }
 }
-
-void ProductionLineView::ShowNoJobToComplete() const { std::cout << "완료 처리할 생산 작업이 없습니다.\n"; }
 
 void ProductionLineView::ShowJobCompleted(const std::string& orderId, int actualQuantity) const {
     std::cout << orderId << " 생산 완료 처리됨 (" << actualQuantity << "개 재고 반영, 주문 상태 CONFIRMED).\n";

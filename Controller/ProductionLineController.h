@@ -9,16 +9,18 @@
 namespace Controller {
 
 // The digit the user types at View::ProductionLineView::PromptMenuChoice().
+// There is no menu option for manual completion — see the class comment.
 enum class ProductionLineMenuOption {
     Exit = 0,
     Refresh = 1,
-    CompleteJob = 2,
 };
 
 // PRD 7.6 production line: a repeating submenu (like SampleController) —
-// "새로고침" re-shows the current job/queue with progress recomputed for
-// "now", "생산 완료 처리" completes the front job and reflects it into
-// Sample.stock / the Order's status.
+// every entry/"새로고침" re-checks whether the front job's elapsed time has
+// reached its estimate (Model::ProductionLine::CompleteFrontJobIfDue) and,
+// if so, automatically reflects it into Sample.stock / the Order's status
+// before showing the (possibly now-updated) current job/queue. There is no
+// manual "생산 완료 처리" — completion is always time-driven.
 class ProductionLineController : public ISubMenuController {
 public:
     ProductionLineController(Model::ProductionLine& productionLine, Model::SampleRepository& sampleRepository,
@@ -28,7 +30,8 @@ public:
 
 private:
     void ShowStatus() const;
-    void HandleCompleteCurrentJob();
+    void TryAutoCompleteFrontJob();
+    void ApplyCompletion(const Model::ProductionJob& completed);
 
     Model::ProductionLine& productionLine_;
     Model::SampleRepository& sampleRepository_;
